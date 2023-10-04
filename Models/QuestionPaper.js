@@ -1,0 +1,21 @@
+const mongoose = require("mongoose");
+const qpSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  link: {
+    type: String,
+    required: true,
+  },
+  subject: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  }
+});
+const QuestionPaper = mongoose.model("QuestionPaper", qpSchema);
+module.exports = QuestionPaper;
