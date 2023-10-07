@@ -10,15 +10,15 @@ const facultySchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    require: true,
+    required: true,
   },
   qualification: {
     type: String,
-    require: true,
+    required: true,
   },
   post: {
     type: String,
-    require: true,
+    required: true,
   },
   experience: {
     type: String,
@@ -26,7 +26,7 @@ const facultySchema = new mongoose.Schema({
   },
   photo: {
     type: String,
-    require: true,
+    required: true,
   },
   role: {
     type: Number,

@@ -8,9 +8,15 @@ const timeTableSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  semester:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Semester",
+    required:true
+  },
   shift: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Shift",
+    required:true
   },
   createdAt: {
     type: Date,

@@ -15,8 +15,8 @@ const qpSchema = new mongoose.Schema({
   },
   subject: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
     ref: "Subject",
+    required: true,
   },
   createdAt: {
     type: Date,

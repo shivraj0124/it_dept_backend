@@ -207,7 +207,7 @@ router.get("/get-semesters", async (req, res) => {
   }
 });
 // Get all Shifts by Semester
-router.get("/shifts/:id", async (req, res) => {
+router.get("/get-shifts/:id", async (req, res) => {
   try {
     const id = req.params.id;
 
@@ -245,7 +245,7 @@ router.get("/subjects/:id", async (req, res) => {
 
 // Add new Time Table
 router.post("/addTT", async (req, res) => {
-  const { name, shift } = req.body;
+  const { name, shift, semester } = req.body;
   try {
     const file = req.files.photo;
     cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
@@ -253,9 +253,9 @@ router.post("/addTT", async (req, res) => {
       const newTimeTable = new timeTableModel({
         name,
         photo: result.url,
+        semester,
         shift,
       });
-
       await newTimeTable.save();
     });
     return res.status(200).send({
@@ -302,19 +302,27 @@ router.post("/add-notes", async (req, res) => {
 });
 // Add new Question paper
 router.post("/add-qp", async (req, res) => {
-  const { name, link, subject } = req.body;
+  const { name, link, subject,semester } = req.body;
   try {
     const newQP = new qPModel({
       name,
       link,
       subject,
+      semester
     });
-    await newQP.save();
-
+    const qpExist = await qPModel.findOne({ name: name });
+    // console.log(facultyExist._id ,facultyId);
+    if (qpExist && qpExist.name !== name) {
+      return res.status(200).send({
+        data: { success: false, message: "Question Paper Already Exist" },
+      });
+    } else {
+      await newQP.save();
     return res.status(200).send({
       success: true,
       message: "Question paper Added Successfully",
     });
+  }
   } catch (err) {
     res.send({
       success: false,
@@ -347,7 +355,7 @@ router.post("/add-notice", async (req, res) => {
 //Get All time tables
 router.get("/get-timetables", async (req, res) => {
   try {
-    const timeTable = await timeTableModel.find();
+    const timeTable = await timeTableModel.find().populate("semester").populate("shift");
     res.send({ success: true, timeTable });
   } catch (error) {
     console.error("Error fetching faculty details:", error);
@@ -356,6 +364,78 @@ router.get("/get-timetables", async (req, res) => {
       .send({ success: false, error: "Failed to fetch faculty details" });
   }
 });
+// Delete Time Table
+router.delete("/delete-TT/:id", async (req, res) => {
+  const tTId = req.params.id;
+
+  try {
+    const isTT = await timeTableModel.findByIdAndRemove(tTId);
+
+    if (!isTT) {
+      return res
+        .status(404)
+        .send({ success: false, message: "Time Table not found" });
+    }
+
+    res.send({ success: true, message: "Time Table successfully" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+// update faculties
+router.put("/update-tt/:id", async (req, res) => {
+  try {
+    const TTId = req.params.id;
+    const TT = await timeTableModel.findById(TTId);
+
+    const { name, semester,shift} = req.body;
+    const TTExist = await timeTableModel.findOne({ name: name });
+  
+    if (TTExist && TT.name !== name) {
+      return res.status(200).send({
+        data: { success: false, message: "Time Table Already Exist" },
+      });
+    } else {
+     
+      if (!TT) {
+        return res
+          .status(404)
+          .send({ success: false, message: "Time Table not found" });
+      }
+
+      TT.name=name,
+      TT.semester=semester,
+      TT.shift=shift
+
+       if(req.files && req.files.photo) {
+        const photoFile = req.files.photo;
+        const result = await uploadTTPhotoToCloudinary(photoFile);
+
+        if (result && result.secure_url) {
+          TT.photo = result.secure_url;
+        }
+      }
+
+      await TT.save();
+      res.status(200).send({ success: true, updatedTT: TT });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+
+// uploading photo to cloudinary
+async function uploadTTPhotoToCloudinary(photoFile) {
+  try {
+    const result = await cloudinary.uploader.upload(photoFile.tempFilePath);
+    return result;
+  } catch (error) {
+    console.error("Error uploading photo to Cloudinary:", error);
+    return null;
+  }
+}
 //Get shift by id
 router.get("/get-shift/:id", async (req, res) => {
   try {
@@ -472,6 +552,136 @@ router.get("/get-subject/:id", async (req, res) => {
       success: error,
       message: "An error occurred while retrieving shifts",
     });
+  }
+});
+// Get All Question papers
+router.get("/get-qp", async (req, res) => {
+  try {
+    const qP = await qPModel.find().populate("subject").populate("semester");
+    res.send({ success: true, qP });
+  } catch (error) {
+    console.error("Error fetching Question Paper details:", error);
+    res
+      .status(500)
+      .send({ success: false, error: "Failed to fetch Questions Paper details" });
+  }
+});
+// --> Manage All qp <-- //
+router.put("/update-qp/:id", async (req, res) => {
+  try {
+    const qpId = req.params.id;
+    const qP = await qPModel.findById(qpId);
+
+    const { name, link, semester, subject } = req.body;
+    const qPExist = await qPModel.findOne({ name: name });
+
+    if (qPExist && qP.name !== name) {
+      return res.status(200).send({
+        data: { success: false, message: "Question paper Already Exist" },
+      });
+    } else {
+      const qP = await qPModel.findById(qpId);
+      if (!qP) {
+        return res
+          .status(404)
+          .send({ success: false, message: "Question paper not found" });
+      }
+      qP.name = name;
+      qP.link = link;
+      qP.semester = semester;
+      qP.subject = subject;
+      await qP.save();
+      res.status(200).send({ success: true, updatedNote: qP });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+
+// Delete Qp
+router.delete("/delete-qp/:id", async (req, res) => {
+  const qPId = req.params.id;
+
+  try {
+    // Find the faculty record by ID and remove it
+    const isQP = await qPModel.findByIdAndRemove(qPId);
+
+    if (!isQP) {
+      return res
+        .status(404)
+        .send({ success: false, message: "Question Paper not found" });
+    }
+
+    res.send({ success: true, message: "Question Paper deleted successfully" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+// Manage Notices
+router.get('/get-notices',async (req,res)=>{
+  try {
+    const notice = await noticeModel.find()
+    res.send({ success: true, notice });
+  } catch (error) {
+    console.error("Error fetching Notice details:", error);
+    res
+      .status(500)
+      .send({
+        success: false,
+        error: "Failed to fetch Notice details",
+      });
+  }
+})
+router.delete("/delete-notice/:id", async (req, res) => {
+  const noticeId = req.params.id;
+
+  try {
+    // Find the faculty record by ID and remove it
+    const isNotice = await noticeModel.findByIdAndRemove(noticeId);
+
+    if (!isNotice) {
+      return res
+        .status(404)
+        .send({ success: false, message: "Notice not found" });
+    }
+
+    res.send({ success: true, message: "Notice deleted successfully" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+router.put("/update-notice/:id", async (req, res) => {
+  try {
+    const noticeId = req.params.id;
+    const notice = await noticeModel.findById(noticeId);
+
+    const { title, link, description} = req.body;
+    const noticeExist = await noticeModel.findOne({ title: title });
+
+    if (noticeExist && notice.title !== title) {
+      return res.status(200).send({
+        data: { success: false, message: "Notice Already Exist" },
+      });
+    } else {
+      const notice = await noticeModel.findById(noticeId);
+      if (!notice) {
+        return res
+          .status(404)
+          .send({ success: false, message: "Notice not found" });
+      }
+      notice.title = title;
+      notice.link = link;
+      notice.description = description;
+      
+      await notice.save();
+      res.status(200).send({ success: true, updatedNotice: notice });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
   }
 });
 

@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const noticeModel = new mongoose.Schema({
   title: {
     type: String,
-    require: true,
+    required: true,
   },
   link: {
     type: String,
