@@ -17,7 +17,57 @@ cloudinary.config({
   api_secret: api_secret_key,
   secure: true,
 });
-
+// Dashboard
+// Total Faculties
+router.get("/faculties-count", async (req, res) => {
+  try {
+    const totalCount = await facultyModel.countDocuments();
+    res.send({ totalFaculties: totalCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+}); 
+// Total Notes
+router.get("/notes-count", async (req, res) => {
+  try {
+    const totalCount = await notesModel.countDocuments();
+    res.send({ totalNotes: totalCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+}); 
+// Total QPs
+router.get("/qp-count", async (req, res) => {
+  try {
+    const totalCount = await qPModel.countDocuments();
+    res.send({ totalQP: totalCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+// Total Time tables
+router.get("/timeTable-count", async (req, res) => {
+  try {
+    const totalCount = await timeTableModel.countDocuments();
+    res.send({ totalTimetables: totalCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+// Total Notices
+router.get("/notice-count", async (req, res) => {
+  try {
+    const totalCount = await noticeModel.countDocuments();
+    res.send({ totalNotices: totalCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});  
 // Add new faculty
 router.post("/add-faculty", async (req, res, next) => {
   try {
