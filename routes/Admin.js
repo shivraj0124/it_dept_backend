@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const cloudinary = require("cloudinary").v2;
+const adminModel=require('../Models/AdminModel')
+const studentModel = require("../Models/Student");
 const facultyModel = require("../Models/FacultyModel");
 const semesterModel = require("../Models/Semester");
 const subjectModel = require("../Models/Subject");
@@ -10,6 +12,7 @@ const timeTableModel = require("../Models/TimeTable");
 const notesModel = require("../Models/Notes");
 const qPModel = require("../Models/QuestionPaper");
 const noticeModel = require("../Models/Notice");
+const achievementModel =require("../Models/Achievements")
 const api_secret_key = process.env.Cld_Api_key;
 cloudinary.config({
   cloud_name: "dc28atbon",
@@ -143,7 +146,6 @@ router.put("/update-faculty/:id", async (req, res) => {
           .status(404)
           .send({ success: false, message: "Faculty not found" });
       }
-
       // Update faculty details based on the request data
       faculty.name = name;
       faculty.email = email;
@@ -734,5 +736,265 @@ router.put("/update-notice/:id", async (req, res) => {
     res.status(500).send({ success: false, message: "Internal server error" });
   }
 });
+// Achievements 
+router.post('/add-achievements',async (req,res)=>{
+  const { title,description } = req.body;
+  try {
+    const achievementExist = await achievementModel.findOne({ title: title });
+    // console.log(facultyExist._id ,facultyId);
+    if (achievementExist) {
+      return res.status(200).send({
+        data: { success: false, message: "Achievement Already Exist" },
+      });
+    }      
+      const file = req.files.photo;    
+      cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
+      const newAchievements = new achievementModel({
+        title,
+        description,
+        photo:result.url,
+      });
+      await newAchievements.save();
+    })
+      return res.status(200).send({
+        success: true,
+        message: "Achievement Added Successfully",
+      });
+  } catch (err) {
+    res.send({
+      success: false,
+      message: err,
+    });
+  }
+})
+// Get achievements details
+router.get('/get-achievements',async (req,res)=>{
+  try{
+    const achievements = await achievementModel.find()
+    res.send({success:true,achievements})
+  }catch(error){
+    res.status(500).send({success:false,error:'Failed to fetch Achievements'})
+  }
+})
 
+// update achievements
+router.put("/update-achievement/:id",async (req,res)=>{
+  try{
+    const achievementId=req.params.id
+    const achievement=await achievementModel.findById(achievementId)
+
+    const {title,description}=req.body
+    if(!achievement){
+      return res.status(400).send({
+        success:false,message:'Achievement Not Found'
+      })
+    }
+    achievement.title=title,
+    achievement.description=description
+    console.log(achievement);
+     if (req.files && req.files.photo) {
+        const photoFile = req.files.photo;
+        const result = await uploadPhotoToCloudinary(photoFile);
+
+        if (result && result.secure_url) {
+          achievement.photo = result.secure_url;
+        }
+      }
+      await achievement.save()
+      res.send({success:true,updatedAchievement:achievement})
+    
+  }catch(error){
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+//
+router.delete("/delete-achievement/:id", async (req, res) => {
+  const achievementId = req.params.id;
+
+  try {
+    // Find the faculty record by ID and remove it
+    const deletedAchievement = await achievementModel.findByIdAndRemove(achievementId);
+
+    if (!deletedAchievement) {
+      return res
+        .status(404)
+        .send({ success: false, message: "Achievement not found" });
+    }
+
+    res.send({ success: true, message: "Achievement deleted successfully" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+
+// Students
+
+router.post("/add-student", async (req, res, next) => {
+  try {
+    const { name, email, EnrNo, password, phone, semester, shift } = req.body;
+    const StudentExist = await studentModel.findOne({ EnrNo: EnrNo });
+    if (StudentExist) {
+      return res
+        .status(200)
+        .send({ success: false, message: "Student Already exist" });
+    }
+    const hashedPass = await bcrypt.hash(password, 10);
+    const newStudent = new studentModel({
+      name,
+      email,
+      EnrNo,
+      password: hashedPass,
+      phone,
+      semester,
+      shift,
+    });
+    await newStudent.save();
+    return res.status(200).send({
+      success: true,
+      newStudent,
+    });
+  } catch (error) {
+    return res.status(400).send({
+      success: false,
+      message: error,
+    });
+  }
+});
+// Get Students
+router.get('/get-students',async (req,res)=>{
+  try{
+    const students=await studentModel.find().populate("semester").populate("shift")
+    res.send({
+      success:true,
+      students
+    })
+  }catch(error){
+    return res.status(400).send({
+      success: false,
+      message: "Network Error",
+    });
+  }
+})
+// Update Student
+router.put("/update-student/:id", async (req, res) => {
+  try{
+    const studentId=req.params.id
+    const student = await studentModel.findById(studentId)
+     if (!student) {
+       return res
+         .status(404)
+         .send({ success: false, message: "Student not found" });
+     }
+    const {name,email,EnrNo,phone,semester,shift}=req.body
+    const studentExist= await studentModel.findOne({EnrNo:EnrNo})
+    if(studentExist && student.EnrNo !== EnrNo){
+      return res.status(200).send({
+        data: { success: false, message: "Enrollment No Already Exist" },
+      });
+    }else{
+      student.name=name
+      student.email=email,
+      student.EnrNo=EnrNo,
+      student.phone=phone,
+      student.semester=semester,
+      student.shift=shift
+    }
+    await student.save()
+     res.status(200).send({ success: true, student });
+
+  }catch(error){
+    return res.status(400).send({
+      success: false,
+      message: "Network Error",
+    });
+  }
+})
+// get student by EnrNo
+router.get('/search-student', async (req, res) => {
+  try {
+    const { EnrNo } = req.query; // Get the EnrNo from the query parameters
+
+    const student = await studentModel.findOne({ EnrNo: EnrNo });
+
+    if (!student) {
+      return res.status(404).send({ success: false, message: 'Student not found' });
+    }
+
+    return res.status(200).send({ success: true, student });
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      message: 'Internal Server Error',
+    });
+  }
+});
+//Update Password Student
+router.put('/update-passwordSt/:id',async (req,res)=>{
+  try{
+    const studentId = req.params.id;
+    const {password}=req.body
+    const student = await studentModel.findById(studentId);
+    if (!student) {
+      return res
+        .status(404)
+        .send({ success: false, message: "Student not found" });
+    }
+    const hashedPass = await bcrypt.hash(password, 10);
+    student.password=hashedPass
+    await student.save();
+    res.status(200).send({ success: true, student });
+  }catch(error){
+    return res.status(400).send({
+      success: false,
+      message: "Network Error",
+    });
+  }
+})
+// delete student
+router.delete("/delete-student/:id", async (req, res) => {
+try{
+  const studentId=req.params.id
+  const deletedStudent = await studentModel.findByIdAndRemove(studentId);
+  if (!deletedStudent) {
+    return res
+      .status(404)
+      .send({ success: false, message: "Student not found" });
+  }
+  res.send({ success: true, message: "Student deleted successfully" });
+}catch(error){
+  return res.status(500).send({
+    success: false,
+    message: "Internal Server Error",
+  });
+}
+})
+// Add Admin
+router.post('/add-admin',async (req,res)=>{
+  try {
+    const { name, password } = req.body;
+    const adminExist = await adminModel.findOne({ name: name });
+    if (adminExist) {
+      return res
+        .status(200)
+        .send({ success: false, message: "Admin Already exist" });
+    }
+    const hashedPass = await bcrypt.hash(password, 10);
+    const newAdmin = new adminModel({
+      name,
+      password: hashedPass,      
+    });
+    await newAdmin.save();
+    return res.status(200).send({
+      success: true,
+      newAdmin,
+    });
+  } catch (error) {
+    return res.status(400).send({
+      success: false,
+      message: error,
+    });
+  }
+})
 module.exports = router;

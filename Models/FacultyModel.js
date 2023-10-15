@@ -34,7 +34,7 @@ const facultySchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now, // Set the default value to the current date and time
+    default: Date.now,
   },
 });
 
