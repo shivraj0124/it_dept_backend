@@ -364,7 +364,7 @@ router.post("/add-qp", async (req, res) => {
     });
     const qpExist = await qPModel.findOne({ name: name });
     // console.log(facultyExist._id ,facultyId);
-    if (qpExist && qpExist.name !== name) {
+    if (qpExist) {
       return res.status(200).send({
         data: { success: false, message: "Question Paper Already Exist" },
       });
