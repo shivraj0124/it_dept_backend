@@ -26,6 +26,7 @@ const options = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 };
+mongoose.set("strictQuery", false);
 mongoose.connect(url, options)
   .then(() => {
     console.log("Connected to MongoDB");
