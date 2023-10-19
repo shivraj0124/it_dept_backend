@@ -3,7 +3,7 @@ const app = express();
 require("dotenv").config();
 const cors = require('cors')
 const mongoose =require('mongoose')
-const PORT =process.env.PORT || 3000 ;
+const PORT =3000 ;
 // const url = process.env.API 
 const fileUpload = require('express-fileupload');
 const admin = require("./routes/Admin");
@@ -28,7 +28,7 @@ const options = {
 };
 mongoose.set("strictQuery", false);
 const url =
-  "mongodb+srv://connectitdept:x2FnvrxDpPLhLaUe@cluster0.zpkisx0.mongodb.net/?retryWrites=true&w=majority";
+  "mongodb+srv://connectitdept:x2FnvrxDpPLhLaUe@cluster0.zpkisx0.mongodb.net/test?retryWrites=true&w=majority";
 mongoose.connect(url, options)
   .then(() => {
     console.log("Connected to MongoDB");
