@@ -13,11 +13,11 @@ const notesModel = require("../Models/Notes");
 const qPModel = require("../Models/QuestionPaper");
 const noticeModel = require("../Models/Notice");
 const achievementModel =require("../Models/Achievements")
-// const api_secret_key = process.env.Cld_Api_key;
+const api_secret_key = process.env.Cld_Api_key;
 cloudinary.config({
   cloud_name: "dc28atbon",
   api_key: "382378611656777",
-  api_secret: "-q7wUtOWJhXgvVF-rSB39Kr2DQE",
+  api_secret: api_secret_key,
   secure: true,
 });
 // Dashboard
@@ -333,7 +333,7 @@ router.post("/add-notes", async (req, res) => {
     });
     const noteExist = await notesModel.findOne({ name: name });
     // console.log(facultyExist._id ,facultyId);
-    if (noteExist && note.name !== name) {
+    if (noteExist && noteExist.name !== name) {
       return res.status(200).send({
         data: { success: false, message: "Note Already Exist" },
       });
