@@ -39,7 +39,6 @@ router.get("/get-notes-by-subject/:id", async (req, res) => {
 
 router.get("/search-notes", async (req, res) => {
   const { search, semester } = req.query;
-
   try {
     let filter = {};
 

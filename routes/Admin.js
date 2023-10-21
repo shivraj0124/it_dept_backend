@@ -135,7 +135,7 @@ router.put("/update-faculty/:id", async (req, res) => {
     const { name, email,phone, qualification, post, experience } = req.body;
     const facultyExist = await facultyModel.findOne({ email: email ,phone:phone});
     // console.log(facultyExist._id ,facultyId);
-    if (facultyExist && faculty.phone !== phone) {
+    if (facultyExist && faculty.phone !== phone && faculty.email !== email) {
       return res.status(200).send({
         data: { success: false, message: "Phone No Already Exist" },
       });
@@ -207,6 +207,26 @@ router.delete("/delete-faculty/:id", async (req, res) => {
     res.status(500).send({ success: false, message: "Internal server error" });
   }
 });
+router.get("/search-faculty", async (req, res) => {
+  try {
+    const { search } = req.query; // Get the search query from the query parameters
+
+    const faculties = await facultyModel.find({
+      $or: [
+        { name: { $regex: ".*" + search + ".*", $options: "i" } },
+        { email: { $regex: ".*" + search + ".*", $options: "i" } },
+        { post: { $regex: ".*" + search + ".*", $options: "i" } },
+        { qualification: { $regex: ".*" + search + ".*", $options: "i" } },
+        { experience: { $regex: ".*" + search + ".*", $options: "i" } },
+      ],
+    });
+
+    res.status(200).send({ success: true, faculties });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
 
 // Create Semester
 router.post("/create-sem", async (req, res) => {
@@ -227,6 +247,138 @@ router.post("/create-sem", async (req, res) => {
       success: false,
       message: "An error ",
     });
+  }
+});
+router.get("/search-student", async (req, res) => {
+  try {
+    const { search } = req.query; // Get the search query from the query parameters
+
+    const students = await studentModel.find({
+      $or: [
+        { name: { $regex: ".*" + search + ".*", $options: "i" } },
+        { email: { $regex: ".*" + search + ".*", $options: "i" } },
+        { EnrNo: { $regex: ".*" + search + ".*", $options: "i" } },
+      ],
+    });
+
+    res.status(200).send({ success: true, students });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+router.get("/get-students-by-semester/:id", async (req, res) => {
+  try {
+    const semesterId = req.params.id;
+    const students = await studentModel.find({ semester: semesterId })
+      .populate("shift")
+      .populate("semester");
+    res.send({ success: true, students });
+  } catch (error) {
+    console.error("Error fetching notes details:", error);
+    res
+      .status(500)
+      .send({ success: false, error: "Failed to fetch Notes details" });
+  }
+});
+router.get("/get-students-by-shift/:id", async (req, res) => {
+  try {
+    const shiftId = req.params.id;
+    const students = await studentModel.find({ shift: shiftId })
+      .populate("shift")
+      .populate("semester");
+    res.send({ success: true, students });
+  } catch (error) {
+    console.error("Error fetching notes details:", error);
+    res
+      .status(500)
+      .send({ success: false, error: "Failed to fetch Notes details" });
+  }
+});
+router.get("/search-note", async (req, res) => {
+  try {
+    const { search } = req.query; // Get the search query from the query parameters
+
+    const notes = await notesModel.find({
+        $or: [
+          { name: { $regex: ".*" + search + ".*", $options: "i" } },
+        ],
+      }).populate("subject").populate("semester")     
+    res.status(200).send({ success: true, notes });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+router.get("/get-notes-by-semester/:id", async (req, res) => {
+  try {
+    const semesterId = req.params.id;
+    const notes = await notesModel
+      .find({ semester: semesterId })
+      .populate("subject")
+      .populate("semester");
+    res.send({ success: true, notes });
+  } catch (error) {
+    console.error("Error fetching notes details:", error);
+    res
+      .status(500)
+      .send({ success: false, error: "Failed to fetch Notes details" });
+  }
+});
+router.get("/get-notes-by-subject/:id", async (req, res) => {
+  try {
+    const subjectId = req.params.id;
+    const notes = await notesModel
+      .find({ subject: subjectId })
+      .populate("subject")
+      .populate("semester");
+    res.send({ success: true, notes });
+  } catch (error) {
+    console.error("Error fetching notes details:", error);
+    res
+      .status(500)
+      .send({ success: false, error: "Failed to fetch Notes details" });
+  }
+});
+router.get("/search-qp", async (req, res) => {
+  try {
+    const { search } = req.query; // Get the search query from the query parameters
+
+    const qp = await qPModel.find({
+      $or: [{ name: { $regex: ".*" + search + ".*", $options: "i" } }],
+    });
+    res.status(200).send({ success: true, qp });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+router.get("/get-qp-by-semester/:id", async (req, res) => {
+  try {
+    const semesterId = req.params.id;
+    const qp = await qPModel.find({ semester: semesterId })
+      .populate("subject")
+      .populate("semester");
+    res.send({ success: true, qp });
+  } catch (error) {
+    console.error("Error fetching notes details:", error);
+    res
+      .status(500)
+      .send({ success: false, error: "Failed to fetch Notes details" });
+  }
+});
+router.get("/get-qp-by-subject/:id", async (req, res) => {
+  try {
+    const subjectId = req.params.id;
+    const qp = await qPModel.find({ subject: subjectId })
+      .populate("subject")
+      .populate("semester");
+    res.send({ success: true, qp });
+  } catch (error) {
+    console.error("Error fetching notes details:", error);
+    res
+      .status(500)
+      .send({ success: false, error: "Failed to fetch Notes details" });
   }
 });
 // Create Subjects
