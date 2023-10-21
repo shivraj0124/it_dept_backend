@@ -4,6 +4,7 @@ const notesModel=require('../Models/Notes')
 const semesterModel =require('../Models/Semester')
 const qPModel = require("../Models/QuestionPaper");
 const timeTableModel =require('../Models/TimeTable')
+const fNoticeModel =require('../Models/FNotice')
 router.get("/get-notes/:id", async (req, res) => {
   try {
     const semesterId =req.params.id
@@ -35,31 +36,6 @@ router.get("/get-notes-by-subject/:id", async (req, res) => {
       .send({ success: false, error: "Failed to fetch Notes details" });
   }
 });
-
-// router.get("/searchNote", async (req, res) => {
-//   try {
-//     const { search } = req.query; // Use req.query to get the search parameter from the query string
-
-//     const result = await notesModel.find({
-//       $or: [
-//         { name: { $regex: ".*" + search + ".*", $options: "i" } },
-//         // You can add more fields to search here
-//       ],
-     
-//     });
-
-//     return res.status(200).send({
-//       success: true,
-//       result,
-//     });
-//   } catch (error) {
-//     console.error("Error searching notes:", error);
-//     return res.status(500).send({
-//       success: false,
-//       message: "Failed to search notes",
-//     });
-//   }
-// });
 
 router.get("/search-notes", async (req, res) => {
   const { search, semester } = req.query;
@@ -115,7 +91,6 @@ router.get("/get-quesP-by-subject/:id", async (req, res) => {
 });
 router.get("/search-quesP", async (req, res) => {
   const { search, semester } = req.query;
-
   try {
     let filter = {};
 
@@ -152,6 +127,22 @@ router.get("/get-timeTable", async (req, res) => {
         success: false,
         error: "Failed to fetch Time Table details",
       });
+  }
+});
+router.get("/get-notices", async (req, res) => {
+  try {
+    const { semesterId, shiftId } = req.query;
+    const notice = await fNoticeModel
+      .find({ semester: semesterId, shift: shiftId })
+      .populate("shift")
+      .populate("semester");
+    res.send({ success: true, notice });
+  } catch (error) {
+    console.error("Error fetching Time Table details:", error);
+    res.status(500).send({
+      success: false,
+      error: "Failed to fetch Time Table details",
+    });
   }
 });
 module.exports = router;

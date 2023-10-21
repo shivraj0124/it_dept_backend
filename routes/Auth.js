@@ -55,10 +55,10 @@ router.post('/admin-login', async (req, res) => {
 });
 router.post('/faculty-login', async (req, res) => {
   
-  const { name, password } = req.body;
+  const { phone, password } = req.body;
   try {
     // Find the student by Enrollment Number
-    const faculty = await facultyModel.findOne({ name });
+    const faculty = await facultyModel.findOne({ phone });
     if (!faculty) {
       return res
         .status(400)

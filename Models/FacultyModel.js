@@ -5,7 +5,11 @@ const facultySchema = new mongoose.Schema({
     required: true,
   },
   email: {
-    type: String,
+    type:String,
+    required:true
+  },
+  phone: {
+    type: Number,
     required: true,
   },
   password: {

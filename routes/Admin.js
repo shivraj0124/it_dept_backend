@@ -74,13 +74,13 @@ router.get("/notice-count", async (req, res) => {
 // Add new faculty
 router.post("/add-faculty", async (req, res, next) => {
   try {
-    const { name, email, password, qualification, post, experience } = req.body;
+    const { name, email, phone,password, qualification, post, experience } = req.body;
 
     console.log(name);
-    const facultyExist = await facultyModel.findOne({ email: email });
+    const facultyExist = await facultyModel.findOne({ phone: phone,email:email });
     if (facultyExist) {
       return res.status(200).json({
-        data: { success: false, message: "User Already Exist" },
+        data: { success: false, message: "faculty Already Exist" },
       });
     }
     const file = req.files.photo;
@@ -91,6 +91,7 @@ router.post("/add-faculty", async (req, res, next) => {
       const newFaculty = new facultyModel({
         name,
         email,
+        phone,
         password: hashedPass,
         qualification,
         post,
@@ -131,12 +132,12 @@ router.put("/update-faculty/:id", async (req, res) => {
     const facultyId = req.params.id;
     const faculty = await facultyModel.findById(facultyId);
 
-    const { name, email, qualification, post, experience } = req.body;
-    const facultyExist = await facultyModel.findOne({ email: email });
+    const { name, email,phone, qualification, post, experience } = req.body;
+    const facultyExist = await facultyModel.findOne({ email: email ,phone:phone});
     // console.log(facultyExist._id ,facultyId);
-    if (facultyExist && faculty.email !== email) {
+    if (facultyExist && faculty.phone !== phone) {
       return res.status(200).send({
-        data: { success: false, message: "Email Already Exist" },
+        data: { success: false, message: "Phone No Already Exist" },
       });
     } else {
       // Check if the faculty with the given ID exists
@@ -149,6 +150,7 @@ router.put("/update-faculty/:id", async (req, res) => {
       // Update faculty details based on the request data
       faculty.name = name;
       faculty.email = email;
+      faculty.phone = phone;
       faculty.qualification = qualification;
       faculty.post = post;
       faculty.experience = experience;
@@ -323,21 +325,24 @@ router.post("/addTT", async (req, res) => {
 });
 // Add new notes
 router.post("/add-notes", async (req, res) => {
-  const { name, link, subject, semester } = req.body;
+  const { name, link, subject, semester,role} = req.body;
   try {
-    const newNotes = new notesModel({
-      name,
-      link,
-      subject,
-      semester,
-    });
+   
     const noteExist = await notesModel.findOne({ name: name });
+    console.log(noteExist, 'Hello World');
     // console.log(facultyExist._id ,facultyId);
-    if (noteExist && noteExist.name !== name) {
+    if (noteExist) {
       return res.status(200).send({
         data: { success: false, message: "Note Already Exist" },
       });
     } else {
+       const newNotes = new notesModel({
+         name,
+         link,
+         subject,
+         semester,
+         role,
+       });
       await newNotes.save();
 
       return res.status(200).send({
@@ -354,13 +359,14 @@ router.post("/add-notes", async (req, res) => {
 });
 // Add new Question paper
 router.post("/add-qp", async (req, res) => {
-  const { name, link, subject,semester } = req.body;
+  const { name, link, subject,semester,role } = req.body;
   try {
     const newQP = new qPModel({
       name,
       link,
       subject,
-      semester
+      semester,
+      role
     });
     const qpExist = await qPModel.findOne({ name: name });
     // console.log(facultyExist._id ,facultyId);
