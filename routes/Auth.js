@@ -4,7 +4,7 @@ const adminModel=require('../Models/AdminModel')
 const facultyModel=require('../Models/FacultyModel')
 const express =require('express')
 const router = express.Router();
-const bcrypt = require("bcrypt");
+const argon2 = require("argon2");
 
 
 router.post('/student-login',async (req, res) => {
@@ -18,10 +18,12 @@ router.post('/student-login',async (req, res) => {
       return res.status(400).send({ success: false, message: 'Student not found' });
     }
     // Compare the provided password with the hashed password
-    const passwordMatch = await bcrypt.compare(password, student.password);
+     const passwordMatches = await argon2.verify(student.password,password);
 
-    if (!passwordMatch) {
-      return res.status(401).send({ success: false, message: 'Incorrect password' });
+    if (!passwordMatches) {
+      return res
+        .status(401)
+        .send({ success: false, message: "Incorrect password" });
     }
     const user=student
     res.status(200).send({ success: true, user});
@@ -42,9 +44,9 @@ router.post('/admin-login', async (req, res) => {
         .send({ success: false, message: "Admin not found" });
     }
     // Compare the provided password with the hashed password
-    const passwordMatch = await bcrypt.compare(password, admin.password);
+    const passwordMatches = await argon2.verify(admin.password, password);
 
-    if (!passwordMatch) {
+    if (!passwordMatches) {
       return res.status(401).send({ success: false, message: 'Incorrect password' });
     }
     const user = admin;
@@ -65,9 +67,9 @@ router.post('/faculty-login', async (req, res) => {
         .send({ success: false, message: "Faculty not found" });
     }
     // Compare the provided password with the hashed password
-    const passwordMatch = await bcrypt.compare(password, faculty.password);
+   const passwordMatches = await argon2.verify(faculty.password, password);
 
-    if (!passwordMatch) {
+    if (!passwordMatches) {
       return res.status(401).send({ success: false, message: 'Incorrect password' });
     }
     const user = faculty;

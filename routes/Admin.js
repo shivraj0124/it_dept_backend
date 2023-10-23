@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcrypt");
+const argon2 = require("argon2");
 const cloudinary = require("cloudinary").v2;
 const adminModel=require('../Models/AdminModel')
 const studentModel = require("../Models/Student");
@@ -87,7 +87,7 @@ router.post("/add-faculty", async (req, res, next) => {
     console.log(file);
     cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
       console.log(result.url);
-      const hashedPass = await bcrypt.hash(password, 10);
+      const hashedPass = await argon2.hash(password);
       const newFaculty = new facultyModel({
         name,
         email,
@@ -259,7 +259,7 @@ router.get("/search-student", async (req, res) => {
         { email: { $regex: ".*" + search + ".*", $options: "i" } },
         { EnrNo: { $regex: ".*" + search + ".*", $options: "i" } },
       ],
-    });
+    }).populate("semester").populate("shift")
 
     res.status(200).send({ success: true, students });
   } catch (error) {
@@ -293,6 +293,36 @@ router.get("/get-students-by-shift/:id", async (req, res) => {
     res
       .status(500)
       .send({ success: false, error: "Failed to fetch Notes details" });
+  }
+});
+// Update Semester
+router.put("/update-students-semester", async (req, res) => {
+  try {
+    const { currentSemesterId, currentShiftId ,newSemesterId, newShiftId } = req.body;
+
+
+    // Use the updateMany function to update the semester and shift of students
+    const result = await studentModel.updateMany(
+      {
+        semester: currentSemesterId,
+        shift: currentShiftId,
+      },
+      {
+        $set: {
+          semester: newSemesterId,
+          shift: newShiftId,
+        },
+      }
+    );
+
+    res.status(200).send({
+        success: true,
+        message: "Students updated successfully",
+        result,
+      });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
   }
 });
 router.get("/search-note", async (req, res) => {
@@ -346,7 +376,7 @@ router.get("/search-qp", async (req, res) => {
 
     const qp = await qPModel.find({
       $or: [{ name: { $regex: ".*" + search + ".*", $options: "i" } }],
-    });
+    }).populate("subject").populate("semester")
     res.status(200).send({ success: true, qp });
   } catch (error) {
     console.error("Error:", error);
@@ -998,7 +1028,7 @@ router.post("/add-student", async (req, res, next) => {
         .status(200)
         .send({ success: false, message: "Student Already exist" });
     }
-    const hashedPass = await bcrypt.hash(password, 10);
+    const hashedPass = await argon2.hash(password);
     const newStudent = new studentModel({
       name,
       email,
@@ -1138,7 +1168,7 @@ router.post('/add-admin',async (req,res)=>{
         .status(200)
         .send({ success: false, message: "Admin Already exist" });
     }
-    const hashedPass = await bcrypt.hash(password, 10);
+    const hashedPass = await argon2.hash(password);
     const newAdmin = new adminModel({
       name,
       password: hashedPass,      

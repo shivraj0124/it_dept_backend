@@ -1,7 +1,7 @@
 const express =require('express');
 const app = express();
 require("dotenv").config();
-const cors = require('cors')
+const cors = require("cors")
 const mongoose =require('mongoose')
 const PORT =3000 ;
 const url = process.env.API 
@@ -12,7 +12,11 @@ const auth =require('./routes/Auth')
 const faculty=require('./routes/Faculty')
 app.use(
   cors({
-    origin: "*",
+    // origin: "https://mastercode.netlify.app",
+    origin: "http://localhost:5173",
+    methods: ["POST", "GET","DELETE","PUT"],
+    credentials: true,
+    optionSuccessStatus: 200,
   })
 );
 

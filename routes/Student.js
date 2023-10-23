@@ -5,6 +5,20 @@ const semesterModel =require('../Models/Semester')
 const qPModel = require("../Models/QuestionPaper");
 const timeTableModel =require('../Models/TimeTable')
 const fNoticeModel =require('../Models/FNotice')
+const studentModel=require('../Models/Student')
+router.get("/get-student-details/:id",async (req,res)=>{
+  try {
+    const studentId = req.params.id;
+    const student = await studentModel.find({ _id: studentId }).populate("semester").populate("shift")
+     
+    res.send({ success: true, student });
+  } catch (error) {
+    console.error("Error fetching Student details:", error);
+    res
+      .status(500)
+      .send({ success: false, error: "Failed to Student Notes details" });
+  }
+})
 router.get("/get-notes/:id", async (req, res) => {
   try {
     const semesterId =req.params.id
