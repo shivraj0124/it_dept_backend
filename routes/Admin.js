@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const argon2 = require("express");
+// const argon2 = require("express");
 const cloudinary = require("cloudinary").v2;
 const adminModel=require('../Models/AdminModel')
 const studentModel = require("../Models/Student");
@@ -14,6 +14,7 @@ const qPModel = require("../Models/QuestionPaper");
 const noticeModel = require("../Models/Notice");
 const achievementModel =require("../Models/Achievements")
 const api_secret_key = process.env.Cld_Api_key;
+
 cloudinary.config({
   cloud_name: "dc28atbon",
   api_key: "382378611656777",
@@ -87,12 +88,12 @@ router.post("/add-faculty", async (req, res, next) => {
     console.log(file);
     cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
       console.log(result.url);
-      const hashedPass = await argon2.hash(password);
+      
       const newFaculty = new facultyModel({
         name,
         email,
         phone,
-        password: hashedPass,
+        password,
         qualification,
         post,
         experience,
@@ -1028,12 +1029,12 @@ router.post("/add-student", async (req, res, next) => {
         .status(200)
         .send({ success: false, message: "Student Already exist" });
     }
-    const hashedPass = await argon2.hash(password);
+    // const hashedPass = await argon2.hash(password);
     const newStudent = new studentModel({
       name,
       email,
       EnrNo,
-      password: hashedPass,
+      password,
       phone,
       semester,
       shift,
@@ -1168,10 +1169,10 @@ router.post('/add-admin',async (req,res)=>{
         .status(200)
         .send({ success: false, message: "Admin Already exist" });
     }
-    const hashedPass = await argon2.hash(password);
+    // const hashedPass = await argon2.hash(password);
     const newAdmin = new adminModel({
       name,
-      password: hashedPass,      
+      password,      
     });
     await newAdmin.save();
     return res.status(200).send({

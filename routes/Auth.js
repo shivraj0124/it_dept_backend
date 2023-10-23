@@ -4,23 +4,19 @@ const adminModel=require('../Models/AdminModel')
 const facultyModel=require('../Models/FacultyModel')
 const express =require('express')
 const router = express.Router();
-const argon2 = require("express");
+// const argon2 = require("express");
 
 
 router.post('/student-login',async (req, res) => {
   
   const { EnrNo, password } = req.body;
   try {
-    // Find the student by Enrollment Number
     const student = await studentModel.findOne({ EnrNo });
-
     if (!student) {
       return res.status(400).send({ success: false, message: 'Student not found' });
     }
-    // Compare the provided password with the hashed password
-     const passwordMatches = await argon2.verify(student.password,password);
 
-    if (!passwordMatches) {
+    if (student.password !== password) {
       return res
         .status(401)
         .send({ success: false, message: "Incorrect password" });
@@ -43,11 +39,11 @@ router.post('/admin-login', async (req, res) => {
         .status(400)
         .send({ success: false, message: "Admin not found" });
     }
-    // Compare the provided password with the hashed password
-    const passwordMatches = await argon2.verify(admin.password, password);
 
-    if (!passwordMatches) {
-      return res.status(401).send({ success: false, message: 'Incorrect password' });
+    if (admin.password !==password) {
+      return res
+        .status(401)
+        .send({ success: false, message: "Incorrect password" });
     }
     const user = admin;
     res.status(200).send({ success: true, user });
@@ -66,11 +62,10 @@ router.post('/faculty-login', async (req, res) => {
         .status(400)
         .send({ success: false, message: "Faculty not found" });
     }
-    // Compare the provided password with the hashed password
-   const passwordMatches = await argon2.verify(faculty.password, password);
-
-    if (!passwordMatches) {
-      return res.status(401).send({ success: false, message: 'Incorrect password' });
+    if (faculty.password !== password) {
+      return res
+        .status(401)
+        .send({ success: false, message: "Incorrect password" });
     }
     const user = faculty;
     res.status(200).send({ success: true, user });

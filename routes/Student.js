@@ -10,13 +10,17 @@ router.get("/get-student-details/:id",async (req,res)=>{
   try {
     const studentId = req.params.id;
     const student = await studentModel.find({ _id: studentId }).populate("semester").populate("shift")
-     
+    if(!student){
+    res
+      .status(500)
+      .send({ success: false, error: "Student not exist details" });      
+    }     
     res.send({ success: true, student });
   } catch (error) {
     console.error("Error fetching Student details:", error);
     res
       .status(500)
-      .send({ success: false, error: "Failed to Student Notes details" });
+      .send({ success: false, error: "Failed to Student details" });
   }
 })
 router.get("/get-notes/:id", async (req, res) => {

@@ -13,8 +13,8 @@ const faculty=require('./routes/Faculty')
 app.use(
   cors({
     // origin: "https://mastercode.netlify.app",
-    origin: "http://localhost:5173",
-    methods: ["POST", "GET","DELETE","PUT"],
+    origin: "https://information-technology.netlify.app",
+    methods: ["POST", "GET", "DELETE", "PUT"],
     credentials: true,
     optionSuccessStatus: 200,
   })
