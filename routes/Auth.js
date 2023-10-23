@@ -4,7 +4,7 @@ const adminModel=require('../Models/AdminModel')
 const facultyModel=require('../Models/FacultyModel')
 const express =require('express')
 const router = express.Router();
-const argon2 = require("argon2");
+const argon2 = require("express");
 
 
 router.post('/student-login',async (req, res) => {

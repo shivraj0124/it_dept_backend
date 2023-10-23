@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const argon2 = require("argon2");
+const argon2 = require("express");
 const cloudinary = require("cloudinary").v2;
 const adminModel=require('../Models/AdminModel')
 const studentModel = require("../Models/Student");
