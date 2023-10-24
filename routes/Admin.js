@@ -506,6 +506,7 @@ router.post("/addTT", async (req, res) => {
       });
       await newTimeTable.save();
     });
+    console.log("photo uploaded successfully")
     return res.status(200).send({
       success: true,
       message: "done",
