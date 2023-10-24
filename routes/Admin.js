@@ -458,7 +458,6 @@ router.get("/get-semesters", async (req, res) => {
 router.get("/get-shifts/:id", async (req, res) => {
   try {
     const id = req.params.id;
-
     const shifts = await shiftModel
       .find({ semester: id })
       .populate("name", "semester");
@@ -497,7 +496,7 @@ router.post("/addTT", async (req, res) => {
   try {
     const file = req.files.photo;
     cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
-      // console.log(result.url);
+      console.log(result);
       const newTimeTable = new timeTableModel({
         name,
         photo: result.url,
