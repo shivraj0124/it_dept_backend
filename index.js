@@ -12,13 +12,14 @@ const auth =require('./routes/Auth')
 const faculty=require('./routes/Faculty')
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "*",
     // origin: "https://information-technology.netlify.app",
     methods: ["POST", "GET", "DELETE", "PUT"],
     credentials: true,
     optionSuccessStatus: 200,
   })
 );
+
 
 app.use(express.json());
 app.use(fileUpload({
