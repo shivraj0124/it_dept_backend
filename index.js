@@ -12,7 +12,7 @@ const auth =require('./routes/Auth')
 const faculty=require('./routes/Faculty')
 app.use(
   cors({
-    // origin: "https://mastercode.netlify.app",
+    // origin: "http://localhost:5173",
     origin: "https://information-technology.netlify.app",
     methods: ["POST", "GET", "DELETE", "PUT"],
     credentials: true,
@@ -31,7 +31,6 @@ const options = {
   useUnifiedTopology: true,
 };
 mongoose.set("strictQuery", false);
-
 mongoose.connect(url,options)
   .then(() => {
     console.log("Connected to MongoDB");

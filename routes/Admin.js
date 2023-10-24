@@ -13,6 +13,7 @@ const notesModel = require("../Models/Notes");
 const qPModel = require("../Models/QuestionPaper");
 const noticeModel = require("../Models/Notice");
 const achievementModel =require("../Models/Achievements")
+const photoGalleryModel=require("../Models/PhotoGallery")
 const api_secret_key = process.env.Cld_Api_key;
 
 cloudinary.config({
@@ -23,6 +24,15 @@ cloudinary.config({
 });
 // Dashboard
 // Total Faculties
+router.get("/students-count", async (req, res) => {
+  try {
+    const totalCount = await studentModel.countDocuments();
+    res.send({ totalStudents: totalCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+}); 
 router.get("/faculties-count", async (req, res) => {
   try {
     const totalCount = await facultyModel.countDocuments();
@@ -1186,4 +1196,123 @@ router.post('/add-admin',async (req,res)=>{
     });
   }
 })
+// const cloudinary = require("cloudinary"); // You need to import the cloudinary library
+router.post("/add-imageSlider", async (req, res) => {
+  const { title } = req.body;
+  try {
+    const photoExist = await photoGalleryModel.findOne({ title: title });
+
+    if (photoExist) {
+      return res.status(200).json({
+        success: false,
+        message: "Photo Title Already Exists",
+      });
+    }
+    const file = req.files.photo;
+    cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading photo to Cloudinary",
+        });
+      }
+
+      const newPhoto = new photoGalleryModel({
+        title,
+        photo: result.url,
+      });
+
+      await newPhoto.save();
+
+      return res.status(200).json({
+        success: true,
+        newPhoto: newPhoto, // You can send the new photo data in the response
+      });
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred",
+    });
+  }
+});
+
+router.put("/update-imageSlider/:id", async (req, res) => {
+  try {
+    const imageId = req.params.id;
+    const image = await photoGalleryModel.findById(imageId);
+
+    const { title } = req.body;
+    if (!image) {
+      return res.status(404).json({
+        success: false,
+        message: "Image Not Found",
+      });
+    }
+    image.title = title;
+
+    if (req.files && req.files.photo) {
+      const photoFile = req.files.photo;
+      const result = await uploadPhotoToCloudinary(photoFile); // Make sure to define this function
+
+      if (result && result.secure_url) {
+        image.photo = result.secure_url;
+      }
+    }
+    await image.save();
+    return res.status(200).json({
+      success: true,
+      updatedImage: image,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+router.delete("/delete-imageSliderPhoto/:id", async (req, res) => {
+  const imageId = req.params.id;
+
+  try {
+    // Find the faculty record by ID and remove it
+    const deletedImage = await photoGalleryModel.findByIdAndRemove(imageId);
+
+    if (!deletedImage) {
+      return res
+        .status(404)
+        .send({ success: false, message: "Image not found" });
+    }
+
+    res.send({ success: true, message: "Image deleted successfully" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+router.get("/get-imageSlider", async (req, res) => {
+  try{
+    const images = await photoGalleryModel.find()
+    res.send({ success: true, images });
+  }catch(error){
+    res.status(500).send({success:false,error:'Failed to fetch Achievements'})
+  }
+})
+router.get("/search-imagesSlider", async (req, res) => {
+  try {
+    const { search } = req.query; // Get the search query from the query parameters
+
+    const images = await photoGalleryModel.find({
+      $or: [
+        { title: { $regex: ".*" + search + ".*", $options: "i" } },
+      ],
+    });
+
+    res.status(200).send({ success: true, images });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
 module.exports = router;
