@@ -14,12 +14,13 @@ const qPModel = require("../Models/QuestionPaper");
 const noticeModel = require("../Models/Notice");
 const achievementModel =require("../Models/Achievements")
 const photoGalleryModel=require("../Models/PhotoGallery")
-const api_secret_key = process.env.Cld_Api_key;
-
+const my_api_secret_key = process.env.CLOUD_SECRET_API_KEY;
+const my_api_key=process.env.CLOUD_API_KEY;
+const my_cloud_name=process.env.CLOUD_NAME
 cloudinary.config({
-  cloud_name: "dc28atbon",
-  api_key: "382378611656777",
-  api_secret: api_secret_key,
+  cloud_name: my_cloud_name,
+  api_key: my_api_key,
+  api_secret: my_api_secret_key,
   secure: true,
 });
 // Dashboard
