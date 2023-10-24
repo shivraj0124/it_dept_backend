@@ -492,12 +492,18 @@ router.get("/subjects/:id", async (req, res) => {
 
 // Add new Time Table
 router.post("/addTT", async (req, res) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
   const { name, shift, semester } = req.body;
   try {
     const file = req.files.photo;
     cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading the photo",
+        });
+      }
+
       console.log(result);
       const newTimeTable = new timeTableModel({
         name,
@@ -505,20 +511,25 @@ router.post("/addTT", async (req, res) => {
         semester,
         shift,
       });
+
       await newTimeTable.save();
-    });
-    console.log("photo uploaded successfully")
-    return res.status(200).send({
-      success: true,
-      message: "done",
+
+      console.log("photo uploaded successfully");
+
+      return res.status(200).json({
+        success: true,
+        message: "done",
+      });
     });
   } catch (err) {
-    res.send({
+    console.error(err);
+    return res.status(500).json({
       success: false,
-      message: err,
+      message: "An error occurred while processing the request",
     });
   }
 });
+
 // Add new notes
 router.post("/add-notes", async (req, res) => {
   const { name, link, subject, semester,role} = req.body;
