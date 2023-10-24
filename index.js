@@ -19,7 +19,7 @@ app.use(
     origin: "https://information-technology.netlify.app",
     methods: ["POST", "GET", "DELETE", "PUT"],
     credentials: true,
-    optionsSuccessStatus: 200,
+    optionSuccessStatus: 200,
   })
 );
 
