@@ -1,29 +1,30 @@
-const express =require('express');
+const express = require("express");
 const app = express();
 require("dotenv").config();
-const cors = require("cors")
-const mongoose =require('mongoose')
-const PORT =3000 ;
-const url = process.env.API 
-const fileUpload = require('express-fileupload');
+const cors = require("cors");
+const mongoose = require("mongoose");
+const fileUpload = require("express-fileupload");
 const admin = require("./routes/Admin");
-const student=require('./routes/Student')
-const auth =require('./routes/Auth')
-const faculty=require('./routes/Faculty')
+const student = require("./routes/Student");
+const auth = require("./routes/Auth");
+const faculty = require("./routes/Faculty");
+
+const PORT = 3000;
+
+const url = process.env.API; 
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    // origin: "https://information-technology.netlify.app",
-  
+    origin: "http://localhost:5173", // Add other origins as needed
     methods: ["POST", "GET", "DELETE", "PUT"],
     credentials: true,
-    optionSuccessStatus: 200,
+    optionsSuccessStatus: 200, // Correct the optionSuccessStatus
   })
 );
 
-
 app.use(express.json());
-app.use(fileUpload({
+app.use(
+  fileUpload({
     useTempFiles: true,
   })
 );
@@ -32,22 +33,21 @@ const options = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 };
-mongoose.set("strictQuery", false);
-mongoose.connect(url,options)
+
+mongoose
+  .connect(url, options)
   .then(() => {
     console.log("Connected to MongoDB");
-  
   })
   .catch((err) => {
     console.error("Error connecting to MongoDB:", err);
   });
 
+app.use("/api/v1", admin);
+app.use("/api/v2", student);
+app.use("/api/v3", auth);
+app.use("/api/v4", faculty);
 
-app.use("/api/v1",admin);
-app.use("/api/v2",student);
-app.use("/api/v3",auth)
-app.use("/api/v4",faculty)
-
-app.listen(PORT,()=>{
-    console.log('Running......',PORT);
-})
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
