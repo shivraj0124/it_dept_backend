@@ -21,8 +21,8 @@ if (!fs.existsSync(tempDirectory)) {
 }
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    // origin: "https://information-technology.netlify.app",
+    // origin: "http://localhost:5173",
+    origin: "https://information-technology.netlify.app",
     methods: ["POST", "GET", "DELETE", "PUT"],
     credentials: true,
     optionSuccessStatus: 200,
