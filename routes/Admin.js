@@ -18,9 +18,9 @@ const photoGalleryModel=require("../Models/PhotoGallery")
 // const my_api_key=process.env.CLOUD_API_KEY;
 // const my_cloud_name=process.env.CLOUD_NAME
 cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_SECRET_API_KEY,
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true,
 });
 // Dashboard
