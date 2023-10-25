@@ -1373,6 +1373,8 @@ router.delete("/delete-imageSliderPhoto/:id", async (req, res) => {
 // })
 
 // API route to fetch the list of uploaded images
+
+router.use(express.static("public"));
 router.get("/get-imageSlider", async (req, res) => {
   try {
     // Query the database to get a list of uploaded images

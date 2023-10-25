@@ -25,7 +25,7 @@ app.use(
     optionSuccessStatus: 200,
   })
 );
-app.use("./public/images",express.static("files"))
+// app.use("./public/images",express.static("files"))
 // Create a temporary directory if it doesn't exist
 // const tempDirectory = path.join(__dirname, "temp"); // Use an absolute path
 // if (!fs.existsSync(tempDirectory)) {
