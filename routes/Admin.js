@@ -1211,51 +1211,83 @@ router.post('/add-admin',async (req,res)=>{
   }
 })
 // const cloudinary = require("cloudinary"); // You need to import the cloudinary library
-router.post("/add-imageSlider", async (req, res) => {
-  const { title } = req.body;
-  try {
-    const photoExist = await photoGalleryModel.findOne({ title: title });
+// router.post("/add-imageSlider", async (req, res) => {
+//   const { title } = req.body;
+//   try {
+//     const photoExist = await photoGalleryModel.findOne({ title: title });
 
-    if (photoExist) {
-      return res.status(200).json({
-        success: false,
-        message: "Photo Title Already Exists",
-      });
-    }
-    const file = req.files.photo;
-    const uploadOptions = {
-      use_filename: true, // Use the original file name
-      folder: "uploads", // Specify the folder to store the uploaded images
-      upload_preset: "preset-here", // Replace with your preset name
-    };
-    cloudinary.uploader.upload(file.tempFilePath,uploadOptions, async (err, result) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: "Error uploading photo to Cloudinary",
-        });
-      }
-
-      const newPhoto = new photoGalleryModel({
-        title,
-        photo: result.url,
-      });
-
-      await newPhoto.save();
-
-      return res.status(200).json({
-        success: true,
-        newPhoto: newPhoto, // You can send the new photo data in the response
-      });
-    });
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "An error occurred",
-    });
-  }
+//     if (photoExist) {
+//       return res.status(200).json({
+//         success: false,
+//         message: "Photo Title Already Exists",
+//       });
+//     }
+//     const file = req.files.photo;
+//     const uploadOptions = {
+//       use_filename: true, // Use the original file name
+//       folder: "uploads", // Specify the folder to store the uploaded images
+//       upload_preset: "preset-here", // Replace with your preset name
+//     };
+//     cloudinary.uploader.upload(file.tempFilePath,uploadOptions, async (err, result) => {
+//       if (err) {
+//         return res.status(500).json({
+//           success: false,
+//           message: "Error uploading photo to Cloudinary",
+//         });
+//       }
+//       const newPhoto = new photoGalleryModel({
+//         title,
+//         photo: result.url,
+//       });
+//       await newPhoto.save();
+//       return res.status(200).json({
+//         success: true,
+//         newPhoto: newPhoto, // You can send the new photo data in the response
+//       });
+//     });
+//   } catch (err) {
+//     return res.status(500).json({
+//       success: false,
+//       message: "An error occurred",
+//     });
+//   }
+// });
+const multer = require("multer");
+router.use(express.static("public"));
+const storage = multer.diskStorage({
+  destination:function (req, file, cb) {
+    cb(null, '../public');
+  },
+  filename: function (req, file, cb) {
+    const name = Date.now() + "-" + file?.originalname;
+    cb(null, name)
+  },
 });
+const upload = multer({ storage: storage });
 
+router.post("/add-imageSlider", upload.single("image"), async (req, res) => {
+  alert('hello')
+  if (!req.file) {
+    // Handle the case where no file was uploaded
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  const title = req.body.title;
+  const fileName = req.file.name; // Use `req.file.filename` to get the file name
+  
+  
+  
+});
+     // try {
+  //   const newPhoto = await photoGalleryModel.create({
+  //     title: title,
+  //     photo: fileName,
+  //   });
+
+  //   res.json({ status: "ok", newPhoto });
+  // } catch (error) {
+  //   res.status(500).json({ status: error.message });
+  // }
 router.put("/update-imageSlider/:id", async (req, res) => {
   try {
     const imageId = req.params.id;
