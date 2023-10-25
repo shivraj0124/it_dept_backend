@@ -1363,14 +1363,37 @@ router.delete("/delete-imageSliderPhoto/:id", async (req, res) => {
     res.status(500).send({ success: false, message: "Internal server error" });
   }
 });
+// router.get("/get-imageSlider", async (req, res) => {
+//   try{
+//     const images = await photoGalleryModel.find()
+//     res.send({ success: true, images });
+//   }catch(error){
+//     res.status(500).send({success:false,error:'Failed to fetch Achievements'})
+//   }
+// })
+
+// API route to fetch the list of uploaded images
 router.get("/get-imageSlider", async (req, res) => {
-  try{
-    const images = await photoGalleryModel.find()
-    res.send({ success: true, images });
-  }catch(error){
-    res.status(500).send({success:false,error:'Failed to fetch Achievements'})
+  try {
+    // Query the database to get a list of uploaded images
+    const images = await photoGalleryModel.find({});
+
+    // Construct image URLs by prefixing them with the appropriate path
+    const imageUrls = images.map((image) => ({
+      title: image.title,
+      imageUrl: `/public/images/${image.photo}`,
+    }));
+
+    // Send the list of image URLs as a JSON response
+    res.status(200).json({ success: true, imageUrls });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching the images",
+    });
   }
-})
+});
+
 router.get("/search-imagesSlider", async (req, res) => {
   try {
     const { search } = req.query; // Get the search query from the query parameters
