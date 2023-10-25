@@ -18,8 +18,8 @@ const url = process.env.API;
 app.use(
   cors({
     // origin: "http://localhost:5173",
-    origin:'*',
-    // origin: "https://information-technology.netlify.app",
+    // origin:'*',
+    origin: "https://information-technology.netlify.app",
     methods: ["POST", "GET", "DELETE", "PUT"],
     credentials: true,
     optionSuccessStatus: 200,
@@ -34,11 +34,11 @@ app.use(
 
 app.use(express.json());
 
-app.use(
-  fileUpload({
-    useTempFiles: false, // Disable writing to disk (use memory storage)
-  })
-);
+// app.use(
+//   fileUpload({
+//     useTempFiles: false, // Disable writing to disk (use memory storage)
+//   })
+// );
 
 const options = {
   useNewUrlParser: true,

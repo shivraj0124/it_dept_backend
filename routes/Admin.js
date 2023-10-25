@@ -96,9 +96,9 @@ router.post("/add-faculty", async (req, res, next) => {
       });
     }
     const file = req.files.photo;
-    console.log(file);
+    console.log(req.files);
     cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
-      console.log(result.url);
+      console.log(result?.url);
       
       const newFaculty = new facultyModel({
         name,
@@ -108,7 +108,7 @@ router.post("/add-faculty", async (req, res, next) => {
         qualification,
         post,
         experience,
-        photo: result.url,
+        photo: result?.url,
       });
       console.log(newFaculty);
       await newFaculty.save();
@@ -1252,32 +1252,53 @@ router.post('/add-admin',async (req,res)=>{
 //     });
 //   }
 // });
+// routes/photoGalleryRoutes.js
+
+// const express = require("express");
+// const router = express.Router();
 const multer = require("multer");
-router.use(express.static("public"));
+const path = require("path");
+
 const storage = multer.diskStorage({
-  destination:function (req, file, cb) {
-    cb(null, '../public');
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, "../public/images")); // Define the destination directory for uploaded images
   },
   filename: function (req, file, cb) {
-    const name = Date.now() + "-" + file?.originalname;
-    cb(null, name)
+    const name = Date.now() + "-" + file.originalname;
+    cb(null, name);
   },
 });
+
 const upload = multer({ storage: storage });
 
-router.post("/add-imageSlider", upload.single("image"), async (req, res) => {
-  alert('hello')
-  if (!req.file) {
-    // Handle the case where no file was uploaded
-    return res.status(400).json({ error: "No file uploaded" });
-  }
+// const PhotoGallery = require("../models/photoGalleryModel");
 
-  const title = req.body.title;
-  const fileName = req.file.name; // Use `req.file.filename` to get the file name
-  
-  
-  
+router.post("/add-image", upload.single("image"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No image file uploaded" });
+  }
+  console.log(req.file.filename)
+  // res.send({success:true})
+  const { title } = req.body;
+  const image = req.file.filename; // The filename of the uploaded image
+  try {
+    
+    const newPhoto = new photoGalleryModel({ title,photo:image });
+    console.log(image)
+    await newPhoto.save();
+
+    return res.status(200).json({
+      success: true,newPhoto
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while uploading the image",
+    });
+  }
 });
+
+ 
      // try {
   //   const newPhoto = await photoGalleryModel.create({
   //     title: title,
