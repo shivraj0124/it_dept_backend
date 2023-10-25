@@ -17,16 +17,11 @@ app.use(
   cors({
     // origin: "http://localhost:5173",
     origin: "https://information-technology.netlify.app",
-    //origin:"*",
     methods: ["POST", "GET", "DELETE", "PUT"],
     credentials: true,
     optionSuccessStatus: 200,
   })
 );
-//app.use((req,res,next)=>{
-//  res.setHeader("Access-Control-Allow-Origin","*");
-//  next();
-//});
 
 app.use(express.json());
 app.use(
