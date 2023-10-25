@@ -12,11 +12,17 @@ const faculty = require("./routes/Faculty");
 const PORT = 3000;
 
 const url = process.env.API; 
+const fs = require("fs");
 
+// Create a temporary directory if it doesn't exist
+const tempDirectory = "./var/task"; // Adjust the path as needed
+if (!fs.existsSync(tempDirectory)) {
+  fs.mkdirSync(tempDirectory);
+}
 app.use(
   cors({
-    // origin: "http://localhost:5173",
-    origin: "https://information-technology.netlify.app",
+    origin: "http://localhost:5173",
+    // origin: "https://information-technology.netlify.app",
     methods: ["POST", "GET", "DELETE", "PUT"],
     credentials: true,
     optionSuccessStatus: 200,
@@ -27,8 +33,10 @@ app.use(express.json());
 app.use(
   fileUpload({
     useTempFiles: true,
+    tempFileDir: "./var/task", // Replace with your desired directory path
   })
 );
+
 
 const options = {
   useNewUrlParser: true,
