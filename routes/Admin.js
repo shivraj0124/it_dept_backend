@@ -1223,7 +1223,12 @@ router.post("/add-imageSlider", async (req, res) => {
       });
     }
     const file = req.files.photo;
-    cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
+    const uploadOptions = {
+      use_filename: true, // Use the original file name
+      folder: "uploads", // Specify the folder to store the uploaded images
+      upload_preset: "preset-here", // Replace with your preset name
+    };
+    cloudinary.uploader.upload(file.tempFilePath,uploadOptions, async (err, result) => {
       if (err) {
         return res.status(500).json({
           success: false,
