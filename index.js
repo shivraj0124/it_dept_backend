@@ -12,8 +12,8 @@ const faculty = require("./routes/Faculty");
 const PORT = 3000;
 
 const url = process.env.API;
-const fs = require("fs");
-const path = require("path");
+// const fs = require("fs");
+// const path = require("path");
 
 app.use(
   cors({
@@ -26,10 +26,10 @@ app.use(
 );
 
 // Create a temporary directory if it doesn't exist
-const tempDirectory = path.join(__dirname, "temp"); // Use an absolute path
-if (!fs.existsSync(tempDirectory)) {
-  fs.mkdirSync(tempDirectory);
-}
+// const tempDirectory = path.join(__dirname, "temp"); // Use an absolute path
+// if (!fs.existsSync(tempDirectory)) {
+//   fs.mkdirSync(tempDirectory);
+// }
 
 app.use(express.json());
 
