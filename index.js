@@ -15,7 +15,6 @@ const url = process.env.API;
 const fs = require("fs");
 const path = require("path");
 
-
 app.use(
   cors({
     // origin: "http://localhost:5173",
@@ -25,6 +24,7 @@ app.use(
     optionSuccessStatus: 200,
   })
 );
+
 // Create a temporary directory if it doesn't exist
 const tempDirectory = path.join(__dirname, "temp"); // Use an absolute path
 if (!fs.existsSync(tempDirectory)) {
@@ -32,10 +32,10 @@ if (!fs.existsSync(tempDirectory)) {
 }
 
 app.use(express.json());
+
 app.use(
   fileUpload({
-    useTempFiles: true,
-    tempFileDir: tempDirectory, // Use the absolute path to your temporary directory
+    useTempFiles: false, // Disable writing to disk (use memory storage)
   })
 );
 
