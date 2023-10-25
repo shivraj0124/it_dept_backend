@@ -23,10 +23,10 @@ app.use(
     optionSuccessStatus: 200,
   })
 );
-app.use((req,res,next)=>{
-  res.setHeader("Access-Control-Allow-Origin","*");
-  next();
-});
+//app.use((req,res,next)=>{
+//  res.setHeader("Access-Control-Allow-Origin","*");
+//  next();
+//});
 
 app.use(express.json());
 app.use(
