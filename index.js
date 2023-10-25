@@ -11,14 +11,11 @@ const faculty = require("./routes/Faculty");
 
 const PORT = 3000;
 
-const url = process.env.API; 
+const url = process.env.API;
 const fs = require("fs");
+const path = require("path");
 
-// Create a temporary directory if it doesn't exist
-const tempDirectory = "./var/task"; // Adjust the path as needed
-if (!fs.existsSync(tempDirectory)) {
-  fs.mkdirSync(tempDirectory);
-}
+
 app.use(
   cors({
     // origin: "http://localhost:5173",
@@ -28,15 +25,19 @@ app.use(
     optionSuccessStatus: 200,
   })
 );
+// Create a temporary directory if it doesn't exist
+const tempDirectory = path.join(__dirname, "temp"); // Use an absolute path
+if (!fs.existsSync(tempDirectory)) {
+  fs.mkdirSync(tempDirectory);
+}
 
 app.use(express.json());
 app.use(
   fileUpload({
     useTempFiles: true,
-    tempFileDir: "./var/task", // Replace with your desired directory path
+    tempFileDir: tempDirectory, // Use the absolute path to your temporary directory
   })
 );
-
 
 const options = {
   useNewUrlParser: true,
