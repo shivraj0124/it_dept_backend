@@ -34,11 +34,11 @@ app.use(
 
 app.use(express.json());
 
-// app.use(
-//   fileUpload({
-//     useTempFiles: false, // Disable writing to disk (use memory storage)
-//   })
-// );
+app.use(
+  fileUpload({
+    useTempFiles: true, // Disable writing to disk (use memory storage)
+  })
+);
 
 const options = {
   useNewUrlParser: true,
