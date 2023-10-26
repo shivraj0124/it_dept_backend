@@ -1211,92 +1211,92 @@ router.post('/add-admin',async (req,res)=>{
   }
 })
 // const cloudinary = require("cloudinary"); // You need to import the cloudinary library
-// router.post("/add-imageSlider", async (req, res) => {
-//   const { title } = req.body;
-//   try {
-//     const photoExist = await photoGalleryModel.findOne({ title: title });
+router.post("/add-imageSlider", async (req, res) => {
+  const { title } = req.body;
+  try {
+    const photoExist = await photoGalleryModel.findOne({ title: title });
 
-//     if (photoExist) {
-//       return res.status(200).json({
-//         success: false,
-//         message: "Photo Title Already Exists",
-//       });
-//     }
-//     const file = req.files.photo;
-//     const uploadOptions = {
-//       use_filename: true, // Use the original file name
-//       folder: "uploads", // Specify the folder to store the uploaded images
-//       upload_preset: "preset-here", // Replace with your preset name
-//     };
-//     cloudinary.uploader.upload(file.tempFilePath,uploadOptions, async (err, result) => {
-//       if (err) {
-//         return res.status(500).json({
-//           success: false,
-//           message: "Error uploading photo to Cloudinary",
-//         });
-//       }
-//       const newPhoto = new photoGalleryModel({
-//         title,
-//         photo: result.url,
-//       });
-//       await newPhoto.save();
-//       return res.status(200).json({
-//         success: true,
-//         newPhoto: newPhoto, // You can send the new photo data in the response
-//       });
-//     });
-//   } catch (err) {
-//     return res.status(500).json({
-//       success: false,
-//       message: "An error occurred",
-//     });
-//   }
-// });
+    if (photoExist) {
+      return res.status(200).json({
+        success: false,
+        message: "Photo Title Already Exists",
+      });
+    }
+    const file = req.files.photo;
+    // const uploadOptions = {
+    //   use_filename: true, // Use the original file name
+    //   folder: "uploads", // Specify the folder to store the uploaded images
+    //   upload_preset: "preset-here", // Replace with your preset name
+    // };
+    cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading photo to Cloudinary",
+        });
+      }
+      const newPhoto = new photoGalleryModel({
+        title,
+        photo: result.url,
+      });
+      await newPhoto.save();
+      return res.status(200).json({
+        success: true,
+        newPhoto, // You can send the new photo data in the response
+      });
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred",
+    });
+  }
+});
 // routes/photoGalleryRoutes.js
 
 // const express = require("express");
 // const router = express.Router();
-const multer = require("multer");
-const path = require("path");
+// const multer = require("multer");
+// const path = require("path");
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../public/images")); // Define the destination directory for uploaded images
-  },
-  filename: function (req, file, cb) {
-    const name = Date.now() + "-" + file.originalname;
-    cb(null, name);
-  },
-});
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, path.join(__dirname, "../public/images")); // Define the destination directory for uploaded images
+//   },
+//   filename: function (req, file, cb) {
+//     const name = Date.now() + "-" + file.originalname;
+//     cb(null, name);
+//   },
+// });
 
-const upload = multer({ storage: storage });
+// const upload = multer({ storage: storage });
 
-// const PhotoGallery = require("../models/photoGalleryModel");
+// // const PhotoGallery = require("../models/photoGalleryModel");
 
-router.post("/add-image", upload.single("image"), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No image file uploaded" });
-  }
-  console.log(req.file.filename)
-  // res.send({success:true})
-  const { title } = req.body;
-  const image = req.file.filename; // The filename of the uploaded image
-  try {
+// router.post("/add-image", upload.single("image"), async (req, res) => {
+//   if (!req.file) {
+//     return res.status(400).json({ error: "No image file uploaded" });
+//   }
+//   console.log(req.file.filename)
+//   // res.send({success:true})
+//   const { title } = req.body;
+//   const image = req.file.filename; // The filename of the uploaded image
+//   try {
     
-    const newPhoto = new photoGalleryModel({ title,photo:image });
-    console.log(image)
-    await newPhoto.save();
+//     const newPhoto = new photoGalleryModel({ title,photo:image });
+//     console.log(image)
+//     await newPhoto.save();
 
-    return res.status(200).json({
-      success: true,newPhoto
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "An error occurred while uploading the image",
-    });
-  }
-});
+//     return res.status(200).json({
+//       success: true,newPhoto
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: "An error occurred while uploading the image",
+//     });
+//   }
+// });
 
  
      // try {
@@ -1363,38 +1363,38 @@ router.delete("/delete-imageSliderPhoto/:id", async (req, res) => {
     res.status(500).send({ success: false, message: "Internal server error" });
   }
 });
-// router.get("/get-imageSlider", async (req, res) => {
-//   try{
-//     const images = await photoGalleryModel.find()
-//     res.send({ success: true, images });
-//   }catch(error){
-//     res.status(500).send({success:false,error:'Failed to fetch Achievements'})
-//   }
-// })
+router.get("/get-imageSlider", async (req, res) => {
+  try{
+    const images = await photoGalleryModel.find()
+    res.send({ success: true, images });
+  }catch(error){
+    res.status(500).send({success:false,error:'Failed to fetch Achievements'})
+  }
+})
 
 // API route to fetch the list of uploaded images
 
-router.use(express.static("public"));
-router.get("/get-imageSlider", async (req, res) => {
-  try {
-    // Query the database to get a list of uploaded images
-    const images = await photoGalleryModel.find({});
+// router.use(express.static("public"));
+// router.get("/get-imageSlider", async (req, res) => {
+//   try {
+//     // Query the database to get a list of uploaded images
+//     const images = await photoGalleryModel.find({});
 
-    // Construct image URLs by prefixing them with the appropriate path
-    const imageUrls = images.map((image) => ({
-      title: image.title,
-      imageUrl: `/public/images/${image.photo}`,
-    }));
+//     // Construct image URLs by prefixing them with the appropriate path
+//     const imageUrls = images.map((image) => ({
+//       title: image.title,
+//       imageUrl: `/public/images/${image.photo}`,
+//     }));
 
-    // Send the list of image URLs as a JSON response
-    res.status(200).json({ success: true, imageUrls });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "An error occurred while fetching the images",
-    });
-  }
-});
+//     // Send the list of image URLs as a JSON response
+//     res.status(200).json({ success: true, imageUrls });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: "An error occurred while fetching the images",
+//     });
+//   }
+// });
 
 router.get("/search-imagesSlider", async (req, res) => {
   try {
