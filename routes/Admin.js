@@ -14,9 +14,7 @@ const qPModel = require("../Models/QuestionPaper");
 const noticeModel = require("../Models/Notice");
 const achievementModel =require("../Models/Achievements")
 const photoGalleryModel=require("../Models/PhotoGallery")
-// const my_api_secret_key = ;
-// const my_api_key=process.env.CLOUD_API_KEY;
-// const my_cloud_name=process.env.CLOUD_NAME
+const academicAchievementsModel=require("../Models/AcademicAchment")
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -1211,47 +1209,7 @@ router.post('/add-admin',async (req,res)=>{
   }
 })
 // const cloudinary = require("cloudinary"); // You need to import the cloudinary library
-router.post("/add-imageSlider", async (req, res) => {
-  const { title } = req.body;
-  try {
-    const photoExist = await photoGalleryModel.findOne({ title: title });
 
-    if (photoExist) {
-      return res.status(200).json({
-        success: false,
-        message: "Photo Title Already Exists",
-      });
-    }
-    const file = req.files.photo;
-    // const uploadOptions = {
-    //   use_filename: true, // Use the original file name
-    //   folder: "uploads", // Specify the folder to store the uploaded images
-    //   upload_preset: "preset-here", // Replace with your preset name
-    // };
-    cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: "Error uploading photo to Cloudinary",
-        });
-      }
-      const newPhoto = new photoGalleryModel({
-        title,
-        photo: result.url,
-      });
-      await newPhoto.save();
-      return res.status(200).json({
-        success: true,
-        newPhoto, // You can send the new photo data in the response
-      });
-    });
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "An error occurred",
-    });
-  }
-});
 // routes/photoGalleryRoutes.js
 
 // const express = require("express");
@@ -1309,6 +1267,42 @@ router.post("/add-imageSlider", async (req, res) => {
   // } catch (error) {
   //   res.status(500).json({ status: error.message });
   // }
+router.post("/add-imageSlider", async (req, res) => {
+  const { title } = req.body;
+  try {
+    const photoExist = await photoGalleryModel.findOne({ title: title });
+
+    if (photoExist) {
+      return res.status(200).json({
+        success: false,
+        message: "Photo Title Already Exists",
+      });
+    }
+    const file = req.files.photo;
+    cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading photo to Cloudinary",
+        });
+      }
+      const newPhoto = new photoGalleryModel({
+        title,
+        photo: result.url,
+      });
+      await newPhoto.save();
+      return res.status(200).json({
+        success: true,
+        newPhoto, // You can send the new photo data in the response
+      });
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred",
+    });
+  }
+});
 router.put("/update-imageSlider/:id", async (req, res) => {
   try {
     const imageId = req.params.id;
@@ -1372,30 +1366,6 @@ router.get("/get-imageSlider", async (req, res) => {
   }
 })
 
-// API route to fetch the list of uploaded images
-
-// router.use(express.static("public"));
-// router.get("/get-imageSlider", async (req, res) => {
-//   try {
-//     // Query the database to get a list of uploaded images
-//     const images = await photoGalleryModel.find({});
-
-//     // Construct image URLs by prefixing them with the appropriate path
-//     const imageUrls = images.map((image) => ({
-//       title: image.title,
-//       imageUrl: `/public/images/${image.photo}`,
-//     }));
-
-//     // Send the list of image URLs as a JSON response
-//     res.status(200).json({ success: true, imageUrls });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: "An error occurred while fetching the images",
-//     });
-//   }
-// });
-
 router.get("/search-imagesSlider", async (req, res) => {
   try {
     const { search } = req.query; // Get the search query from the query parameters
@@ -1404,6 +1374,126 @@ router.get("/search-imagesSlider", async (req, res) => {
       $or: [
         { title: { $regex: ".*" + search + ".*", $options: "i" } },
       ],
+    });
+
+    res.status(200).send({ success: true, images });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+// Academic Achievements
+router.post("/add-academicAch", async (req, res) => {
+  const { title } = req.body;
+  try {
+    const photoExist = await academicAchievementsModel.findOne({
+      title: title,
+    });
+
+    if (photoExist) {
+      return res.status(200).json({
+        success: false,
+        message: "Photo Title Already Exists",
+      });
+    }
+    const file = req.files.photo;
+    cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading photo to Cloudinary",
+        });
+      }
+      const newPhoto = new academicAchievementsModel({
+        title,
+        photo: result.url,
+      });
+      await newPhoto.save();
+      return res.status(200).json({
+        success: true,
+        newPhoto, // You can send the new photo data in the response
+      });
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred",
+    });
+  }
+});
+router.put("/update-academicAch/:id", async (req, res) => {
+  try {
+    const imageId = req.params.id;
+    const image = await academicAchievementsModel.findById(imageId);
+
+    const { title } = req.body;
+    if (!image) {
+      return res.status(404).json({
+        success: false,
+        message: "Image Not Found",
+      });
+    }
+    image.title = title;
+
+    if (req.files && req.files.photo) {
+      const photoFile = req.files.photo;
+      const result = await uploadPhotoToCloudinary(photoFile); // Make sure to define this function
+
+      if (result && result.secure_url) {
+        image.photo = result.secure_url;
+      }
+    }
+    await image.save();
+    return res.status(200).json({
+      success: true,
+      updatedImage: image,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+router.delete("/delete-academicAch/:id", async (req, res) => {
+  const imageId = req.params.id;
+
+  try {
+    // Find the faculty record by ID and remove it
+    const deletedImage = await academicAchievementsModel.findByIdAndRemove(
+      imageId
+    );
+
+    if (!deletedImage) {
+      return res
+        .status(404)
+        .send({ success: false, message: "Image not found" });
+    }
+
+    res.send({ success: true, message: "Image deleted successfully" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+router.get("/get-academicAch", async (req, res) => {
+  try {
+    const images = await academicAchievementsModel.find();
+    res.send({ success: true, images });
+  } catch (error) {
+    res
+      .status(500)
+      .send({ success: false, error: "Failed to fetch Achievements" });
+  }
+});
+
+router.get("/search-academicAch", async (req, res) => {
+  try {
+    const { search } = req.query; // Get the search query from the query parameters
+
+    const images = await academicAchievementsModel.find({
+      $or: [{ title: { $regex: ".*" + search + ".*", $options: "i" } }],
     });
 
     res.status(200).send({ success: true, images });
