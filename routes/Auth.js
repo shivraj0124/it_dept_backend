@@ -1,10 +1,10 @@
 const mongoose = require('mongoose')
+const express =require('express')
+const router = express.Router();
 const studentModel = require("../Models/Student");
 const adminModel=require('../Models/AdminModel')
 const facultyModel=require('../Models/FacultyModel')
-const express =require('express')
-const router = express.Router();
-// const argon2 = require("express");
+const contactModel=require('../Models/Contact')
 
 
 router.post('/student-login',async (req, res) => {
@@ -73,5 +73,19 @@ router.post('/faculty-login', async (req, res) => {
     res.status(500).send({ success: false, message: 'Server error' });
   }
 });
-
+router.post("/Contact",async (req,res)=>{
+  try{
+     const {name,email,message}=req.body;
+     const newMessage=new contactModel({
+      name,email,message
+     })
+     await newMessage.save()
+      return res.status(200).json({
+        success: true,
+        newMessage, // You can send the new photo data in the response
+      });
+  }catch(error){
+    console.log(error)
+  }
+})
 module.exports = router;
