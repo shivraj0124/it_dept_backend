@@ -1152,8 +1152,8 @@ router.put('/update-passwordSt/:id',async (req,res)=>{
         .status(404)
         .send({ success: false, message: "Student not found" });
     }
-    const hashedPass = await bcrypt.hash(password, 10);
-    student.password=hashedPass
+    // const hashedPass = await bcrypt.hash(password, 10);
+    student.password=password
     await student.save();
     res.status(200).send({ success: true, student });
   }catch(error){
@@ -1208,6 +1208,33 @@ router.post('/add-admin',async (req,res)=>{
     });
   }
 })
+
+router.put('/update-password',async (req,res)=>{
+  try {
+    const {oldPassword,newPassword} =req.body
+    let admin =await adminModel.findOne();
+    if(admin.password !== oldPassword){
+      return res.send({
+        success:false,
+        message:"Old Password is incorrect!"
+      })
+    }    
+    admin.password=newPassword
+    
+    await admin.save()
+    return res.send({success:true,admin})
+    console.log(user)
+  }catch(error){
+    return res.send({
+      success:false,
+      message:'Something went wrong'
+    })
+  }
+})
+
+
+
+
 // const cloudinary = require("cloudinary"); // You need to import the cloudinary library
 
 // routes/photoGalleryRoutes.js

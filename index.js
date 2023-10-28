@@ -17,7 +17,7 @@ const url = process.env.API;
 
 app.use(
   cors({
-   // origin: "http://localhost:5173",
+    // origin: "http://localhost:5173",
     // origin:'*',
     origin: "https://information-technology.netlify.app",
     methods: ["POST", "GET", "DELETE", "PUT","HEAD","PATCH"],
