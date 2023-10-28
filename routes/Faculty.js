@@ -2,10 +2,17 @@ const express = require("express");
 const router = express.Router();
 const semesterModel = require("../Models/Semester");
 const subjectModel = require("../Models/Subject");
-// const shiftModel = require("../Models/Shift");
 const notesModel = require("../Models/Notes");
 const qPModel = require("../Models/QuestionPaper");
 const fNoticeModel =require("../Models/FNotice")
+const facultyModel=require("../Models/FacultyModel")
+const cloudinary = require("cloudinary").v2;
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
 router.post("/add-notes", async (req, res) => {
   const { name, link, subject, semester,role } = req.body;
   try {
@@ -306,4 +313,91 @@ router.put("/update-notice/:id", async (req, res) => {
     res.status(500).send({ success: false, message: "Internal server error" });
   }
 });
+
+router.put("/update-password/:id", async (req, res) => {
+  try {
+    const facultyId=req.params.id
+    const { oldPassword, newPassword } = req.body;
+    const faculty = await facultyModel.findById(facultyId);
+    if (faculty.password !== oldPassword) {
+      return res.send({
+        success: false,
+        message: "Old Password is incorrect!",
+      });
+    }
+    faculty.password = newPassword;
+    console.log(faculty);
+
+    await faculty.save();
+    return res.send({ success: true, faculty });
+  } catch (error) {
+    return res.send({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+});
+router.put("/update-profile/:id", async (req, res) => {
+  try {
+    const facultyId = req.params.id;
+    const faculty = await facultyModel.findById(facultyId);
+
+    const { name, email, phone, qualification, post, experience } = req.body;
+    const facultyExist = await facultyModel.findOne({
+      email: email,
+      phone: phone,
+    });
+    // console.log(facultyExist._id ,facultyId);
+    if (facultyExist && faculty.phone !== phone && faculty.email !== email) {
+      return res.status(200).send({
+        data: { success: false, message: "Phone No Already Exist" },
+      });
+    } else {
+      // Check if the faculty with the given ID exists
+      const faculty = await facultyModel.findById(facultyId);
+      if (!faculty) {
+        return res
+          .status(404)
+          .send({ success: false, message: "Faculty not found" });
+      }
+      // Update faculty details based on the request data
+      faculty.name = name;
+      faculty.email = email;
+      faculty.phone = phone;
+      faculty.qualification = qualification;
+      faculty.post = post;
+      faculty.experience = experience;
+
+      // Handle the optional photo upload and save the URL to the faculty document
+      if (req.files && req.files.photo) {
+        const photoFile = req.files.photo;
+        const result = await uploadPhotoToCloudinary(photoFile);
+
+        if (result && result.secure_url) {
+          faculty.photo = result.secure_url;
+        }
+      }
+
+      // Save the updated faculty data
+      await faculty.save();
+
+      res.status(200).send({ success: true,faculty });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+// uploading photo to cloudinary
+async function uploadPhotoToCloudinary(photoFile) {
+  try {
+    const result = await cloudinary.uploader.upload(photoFile.tempFilePath);
+    return result;
+  } catch (error) {
+    console.error("Error uploading photo to Cloudinary:", error);
+    return null;
+  }
+}
+
+
 module.exports = router
