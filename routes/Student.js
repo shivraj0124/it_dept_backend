@@ -162,4 +162,73 @@ router.get("/get-notices", async (req, res) => {
     });
   }
 });
+router.get("/profile/:id",async (req,res)=>{
+  try{
+    const studentId=req.params.id
+    const student = await studentModel.findById(studentId)
+    return res.send({
+      success :true,
+      student
+    })
+    
+  }catch(err){
+  res.status(500).send({
+  success: false,
+  error: "Failed to fetch Details",
+});
+  }
+})
+router.put("/update-profile/:id",async (req,res)=>{
+  try{
+    const studentId=req.params.id
+    const {name,email,phone}=req.body
+    const student=await studentModel.findById(studentId);
+    const studentExist = await studentModel.findOne({ email:email});
+    console.log(student.email, studentExist);
+    if (
+      studentExist && student.email !== email && student.phone !== phone
+    ) {
+      return res
+        .status(200)
+        .send({ success: false, message: "Email Already Exist" });
+    } else {
+      (student.name = name), (student.email = email), (student.phone = phone);
+      await student.save();
+      res.send({
+        success: true,
+        message: "Profile Updated Successfully",
+        student,
+      });
+    }
+
+  }catch(err){
+    res.status(500).send({
+      success: false,
+      error: "Failed to update profile",
+    });
+  }
+})
+router.put("/change-password/:id",async (req,res)=>{
+  try{
+      const studentId = req.params.id;
+      const { oldPassword, newPassword } = req.body;
+      const student = await studentModel.findById(studentId);
+      if (student.password !== oldPassword) {
+        return res.send({
+          success: false,
+          message: "Old Password is incorrect!",
+        });
+      }
+      student.password = newPassword;
+      console.log(student);
+
+      await student.save();
+      return res.send({ success: true, student });
+  }catch(err){
+    res.status(500).send({
+      success: false,
+      error: "Failed to change password",
+    });
+  }
+})
 module.exports = router;

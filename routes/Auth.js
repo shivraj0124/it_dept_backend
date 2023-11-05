@@ -5,8 +5,8 @@ const studentModel = require("../Models/Student");
 const adminModel=require('../Models/AdminModel')
 const facultyModel=require('../Models/FacultyModel')
 const contactModel=require('../Models/Contact')
-
-
+const achievementModel=require('../Models/Achievements')
+const academicAchievementsModel=require('../Models/AcademicAchment')
 router.post('/student-login',async (req, res) => {
   
   const { EnrNo, password } = req.body;
@@ -88,4 +88,24 @@ router.post("/Contact",async (req,res)=>{
     console.log(error)
   }
 })
+router.get("/get-achievements", async (req, res) => {
+  try {
+    const achievements = await achievementModel.find();
+    res.send({ success: true, achievements });
+  } catch (error) {
+    res
+      .status(500)
+      .send({ success: false, error: "Failed to fetch Achievements" });
+  }
+});
+router.get("/get-academicAch", async (req, res) => {
+  try {
+    const images = await academicAchievementsModel.find();
+    res.send({ success: true, images });
+  } catch (error) {
+    res
+      .status(500)
+      .send({ success: false, error: "Failed to fetch Achievements" });
+  }
+});
 module.exports = router;
