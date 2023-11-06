@@ -184,7 +184,7 @@ router.put("/update-profile/:id",async (req,res)=>{
     const {name,email,phone}=req.body
     const student=await studentModel.findById(studentId);
     const studentExist = await studentModel.findOne({ email:email});
-    console.log(student.email, studentExist);
+    // console.log(student.email, studentExist);
     if (
       studentExist && student.email !== email && student.phone !== phone
     ) {
@@ -220,7 +220,7 @@ router.put("/change-password/:id",async (req,res)=>{
         });
       }
       student.password = newPassword;
-      console.log(student);
+      
 
       await student.save();
       return res.send({ success: true, student });
