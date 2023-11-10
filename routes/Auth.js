@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const express =require('express')
 const router = express.Router();
-const studentModel = require("../Models/Student");
+const tStudent = require("../Models/TestStudent");
 const adminModel=require('../Models/AdminModel')
 const facultyModel=require('../Models/FacultyModel')
 const contactModel=require('../Models/Contact')
@@ -9,14 +9,14 @@ const achievementModel=require('../Models/Achievements')
 const academicAchievementsModel=require('../Models/AcademicAchment')
 router.post('/student-login',async (req, res) => {
   
-  const { EnrNo, password } = req.body;
+  const { EnrollmentNo, Password } = req.body;
   try {
-    const student = await studentModel.findOne({ EnrNo });
+    const student = await tStudent.findOne({ EnrollmentNo });
     if (!student) {
       return res.status(400).send({ success: false, message: 'Student not found' });
     }
 
-    if (student.password !== password) {
+    if (student.Password !== Password) {
       return res
         .status(401)
         .send({ success: false, message: "Incorrect password" });

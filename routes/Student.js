@@ -5,11 +5,11 @@ const semesterModel =require('../Models/Semester')
 const qPModel = require("../Models/QuestionPaper");
 const timeTableModel =require('../Models/TimeTable')
 const fNoticeModel =require('../Models/FNotice')
-const studentModel=require('../Models/Student')
+const tStudent=require('../Models/TestStudent')
 router.get("/get-student-details/:id",async (req,res)=>{
   try {
     const studentId = req.params.id;
-    const student = await studentModel.find({ _id: studentId }).populate("semester").populate("shift")
+    const student = await tStudent.find({ _id: studentId }).populate("Semester").populate("Shift")
     if(!student){
     res
       .status(500)
@@ -165,7 +165,7 @@ router.get("/get-notices", async (req, res) => {
 router.get("/profile/:id",async (req,res)=>{
   try{
     const studentId=req.params.id
-    const student = await studentModel.findById(studentId)
+    const student = await tStudent.findById(studentId).populate("Semester").populate("Shift")
     return res.send({
       success :true,
       student
@@ -181,18 +181,21 @@ router.get("/profile/:id",async (req,res)=>{
 router.put("/update-profile/:id",async (req,res)=>{
   try{
     const studentId=req.params.id
-    const {name,email,phone}=req.body
-    const student=await studentModel.findById(studentId);
-    const studentExist = await studentModel.findOne({ email:email});
+    const {Name,Email,Phone,EnrollmentNo}=req.body
+    const student=await tStudent.findById(studentId);
+    const studentExist = await tStudent.find({Email:Email})
+    console.log(studentExist)
+    console.log(Name,Email,Phone,EnrollmentNo)
     // console.log(student.email, studentExist);
-    if (
-      studentExist && student.email !== email && student.phone !== phone
-    ) {
+    if ( studentExist.length !==0 && EnrollmentNo !== studentExist[0].EnrollmentNo) {
       return res
         .status(200)
         .send({ success: false, message: "Email Already Exist" });
     } else {
-      (student.name = name), (student.email = email), (student.phone = phone);
+      console.log(Name, Email, Phone, EnrollmentNo);
+      student.Name = Name,
+      student.Email = Email
+      student.Phone = Phone;
       await student.save();
       res.send({
         success: true,
@@ -212,14 +215,14 @@ router.put("/change-password/:id",async (req,res)=>{
   try{
       const studentId = req.params.id;
       const { oldPassword, newPassword } = req.body;
-      const student = await studentModel.findById(studentId);
-      if (student.password !== oldPassword) {
+      const student = await tStudent.findById(studentId);
+      if (student.Password !== oldPassword) {
         return res.send({
           success: false,
           message: "Old Password is incorrect!",
         });
       }
-      student.password = newPassword;
+      student.Password = newPassword;
       
 
       await student.save();

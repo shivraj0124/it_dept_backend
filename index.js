@@ -18,7 +18,7 @@ const url = process.env.API;
 app.use(
   cors({
     // origin: "http://localhost:5173",
-    // origin:'*',
+    origin:'*',
     origin: "https://information-technology.netlify.app",
     methods: ["POST", "GET", "DELETE", "PUT","HEAD","PATCH"],
     credentials: true,
@@ -53,6 +53,7 @@ mongoose
   .catch((err) => {
     console.error("Error connecting to MongoDB:", err);
   });
+
 
 app.use("/api/v1", admin);
 app.use("/api/v2", student);

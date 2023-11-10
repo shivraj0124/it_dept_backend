@@ -1,31 +1,90 @@
 const express = require("express");
 const router = express.Router();
-// const argon2 = require("express");
 const cloudinary = require("cloudinary").v2;
+const tStudent = require("../Models/TestStudent")
 const adminModel=require('../Models/AdminModel')
-const studentModel = require("../Models/Student");
-const facultyModel = require("../Models/FacultyModel");
-const semesterModel = require("../Models/Semester");
-const subjectModel = require("../Models/Subject");
-const shiftModel = require("../Models/Shift");
-const timeTableModel = require("../Models/TimeTable");
-const notesModel = require("../Models/Notes");
-const qPModel = require("../Models/QuestionPaper");
-const noticeModel = require("../Models/Notice");
+const facultyModel = require("../Models/FacultyModel")
+const semesterModel = require("../Models/Semester")
+const subjectModel = require("../Models/Subject")
+const shiftModel = require("../Models/Shift")
+const timeTableModel = require("../Models/TimeTable")
+const notesModel = require("../Models/Notes")
+const qPModel = require("../Models/QuestionPaper")
+const noticeModel = require("../Models/Notice")
 const achievementModel =require("../Models/Achievements")
 const photoGalleryModel=require("../Models/PhotoGallery")
 const academicAchievementsModel=require("../Models/AcademicAchment")
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true,
 });
+
+router.get("/get-students-data",async (req,res)=>{
+  try{
+   const students=await tStudent.find({}).populate("Semester").populate("Shift")
+   res.send({
+    success:true,
+    students
+   })
+  }catch(err){
+    res.send({success:false,message:err})
+  }
+})
+ router.post("/upload-excel-file",async (req,res)=>{
+   const dataString = req.body.data;
+   const semShift = req.body.semShift;
+   try {
+     const dataArray = JSON.parse(dataString);
+     console.log(dataArray)
+     const studentsToSave = dataArray.map((data) => ({
+       EnrollmentNo: data.EnrollmentNo,
+       Name: data.Name,
+       Email: data.Email,
+       Password: data.EnrollmentNo,
+       Phone: data.Phone,
+       Semester: semShift.Semester,
+       Shift: semShift.Shift,
+     }));
+    //  const enrollmentNumbers = dataArray.map((data) => data.EnrollmentNo);
+     console.log("Enrollment Numbers:", studentsToSave);
+     const existingStudents = await tStudent.find({
+       $or: [
+         {
+           EnrollmentNo: {
+             $in: studentsToSave.map((data) => data.EnrollmentNo),
+           },
+         },
+         { Email: { $in: studentsToSave.map((data) => data.Email) } },
+       ],
+     });
+
+     if (existingStudents.length > 0) {
+       console.log("EnrollmentNo or Email already exists:", existingStudents);
+       res.status(200)
+         .send({
+           success: false,
+           message: "EnrollmentNo or Email already exists",
+         });
+       return;
+     }
+     const result = await tStudent.insertMany(studentsToSave);
+      console.log("Saved:", result);
+
+     res.status(200).send({success:true,message: "Data received and saved successfully" });
+   } catch (error) {
+     console.error("Error parsing JSON:", error);
+     res.status(400).send({success:false, message: "Invalid JSON data" });
+   }
+ })
+
 // Dashboard
 // Total Faculties
 router.get("/students-count", async (req, res) => {
   try {
-    const totalCount = await studentModel.countDocuments();
+    const totalCount = await tStudent.countDocuments();
     res.send({ totalStudents: totalCount });
   } catch (error) {
     console.error(error);
@@ -263,13 +322,13 @@ router.get("/search-student", async (req, res) => {
   try {
     const { search } = req.query; // Get the search query from the query parameters
 
-    const students = await studentModel.find({
+    const students = await tStudent.find({
       $or: [
-        { name: { $regex: ".*" + search + ".*", $options: "i" } },
-        { email: { $regex: ".*" + search + ".*", $options: "i" } },
-        { EnrNo: { $regex: ".*" + search + ".*", $options: "i" } },
+        { Name: { $regex: ".*" + search + ".*", $options: "i" } },
+        { Email: { $regex: ".*" + search + ".*", $options: "i" } },
+        { EnrollmentNo: { $regex: ".*" + search + ".*", $options: "i" } },
       ],
-    }).populate("semester").populate("shift")
+    }).populate("Semester").populate("Shift")
 
     res.status(200).send({ success: true, students });
   } catch (error) {
@@ -280,9 +339,9 @@ router.get("/search-student", async (req, res) => {
 router.get("/get-students-by-semester/:id", async (req, res) => {
   try {
     const semesterId = req.params.id;
-    const students = await studentModel.find({ semester: semesterId })
-      .populate("shift")
-      .populate("semester");
+    const students = await tStudent.find({ Semester: semesterId })
+      .populate("Shift")
+      .populate("Semester");
     res.send({ success: true, students });
   } catch (error) {
     console.error("Error fetching notes details:", error);
@@ -294,9 +353,9 @@ router.get("/get-students-by-semester/:id", async (req, res) => {
 router.get("/get-students-by-shift/:id", async (req, res) => {
   try {
     const shiftId = req.params.id;
-    const students = await studentModel.find({ shift: shiftId })
-      .populate("shift")
-      .populate("semester");
+    const students = await tStudent.find({ Shift: shiftId })
+      .populate("Shift")
+      .populate("Semester");
     res.send({ success: true, students });
   } catch (error) {
     console.error("Error fetching notes details:", error);
@@ -312,15 +371,15 @@ router.put("/update-students-semester", async (req, res) => {
 
 
     // Use the updateMany function to update the semester and shift of students
-    const result = await studentModel.updateMany(
+    const result = await tStudent.updateMany(
       {
-        semester: currentSemesterId,
-        shift: currentShiftId,
+        Semester: currentSemesterId,
+        Shift: currentShiftId,
       },
       {
         $set: {
-          semester: newSemesterId,
-          shift: newShiftId,
+          Semester: newSemesterId,
+          Shift: newShiftId,
         },
       }
     );
@@ -1044,22 +1103,22 @@ router.delete("/delete-achievement/:id", async (req, res) => {
 
 router.post("/add-student", async (req, res, next) => {
   try {
-    const { name, email, EnrNo, password, phone, semester, shift } = req.body;
-    const StudentExist = await studentModel.findOne({ EnrNo: EnrNo });
+    const { Name, Email, EnrollmentNo, Password, Phone, Semester, Shift } = req.body;
+    const StudentExist = await tStudent.findOne({ EnrollmentNo: EnrollmentNo });
     if (StudentExist) {
       return res
         .status(200)
         .send({ success: false, message: "Student Already exist" });
     }
     // const hashedPass = await argon2.hash(password);
-    const newStudent = new studentModel({
-      name,
-      email,
-      EnrNo,
-      password,
-      phone,
-      semester,
-      shift,
+    const newStudent = new tStudent({
+      Name,
+      Email,
+      EnrollmentNo,
+      Password,
+      Phone,
+      Semester,
+      Shift,
     });
     await newStudent.save();
     return res.status(200).send({
@@ -1076,7 +1135,7 @@ router.post("/add-student", async (req, res, next) => {
 // Get Students
 router.get('/get-students',async (req,res)=>{
   try{
-    const students=await studentModel.find().populate("semester").populate("shift")
+    const students=await tStudent.find().populate("Semester").populate("Shift")
     res.send({
       success:true,
       students
@@ -1092,25 +1151,27 @@ router.get('/get-students',async (req,res)=>{
 router.put("/update-student/:id", async (req, res) => {
   try{
     const studentId=req.params.id
-    const student = await studentModel.findById(studentId)
+    const student = await tStudent.findById(studentId)
      if (!student) {
        return res
          .status(404)
          .send({ success: false, message: "Student not found" });
      }
-    const {name,email,EnrNo,phone,semester,shift}=req.body
-    const studentExist= await studentModel.findOne({EnrNo:EnrNo})
-    if(studentExist && student.EnrNo !== EnrNo){
+    const {EnrollmentNo,Name,Email,Phone,Semester,Shift}=req.body
+    const studentExist = await tStudent.findOne({
+      EnrollmentNo: EnrollmentNo
+    });
+    if(studentExist && student.EnrollmentNo !== EnrollmentNo){
       return res.status(200).send({
         data: { success: false, message: "Enrollment No Already Exist" },
       });
     }else{
-      student.name=name
-      student.email=email,
-      student.EnrNo=EnrNo,
-      student.phone=phone,
-      student.semester=semester,
-      student.shift=shift
+      student.EnrollmentNo=EnrollmentNo,
+      student.Name=Name,
+      student.Email=Email,
+      student.Phone=Phone,
+      student.Semester=Semester,
+      student.Shift=Shift
     }
     await student.save()
      res.status(200).send({ success: true, student });
@@ -1125,9 +1186,9 @@ router.put("/update-student/:id", async (req, res) => {
 // get student by EnrNo
 router.get('/search-student', async (req, res) => {
   try {
-    const { EnrNo } = req.query; // Get the EnrNo from the query parameters
+    const { EnrollmentNo } = req.query; // Get the EnrNo from the query parameters
 
-    const student = await studentModel.findOne({ EnrNo: EnrNo });
+    const student = await tStudent.findOne({ EnrollmentNo: EnrollmentNo });
 
     if (!student) {
       return res.status(404).send({ success: false, message: 'Student not found' });
@@ -1145,15 +1206,15 @@ router.get('/search-student', async (req, res) => {
 router.put('/update-passwordSt/:id',async (req,res)=>{
   try{
     const studentId = req.params.id;
-    const {password}=req.body
-    const student = await studentModel.findById(studentId);
+    const {Password}=req.body
+    const student = await tStudent.findById(studentId);
     if (!student) {
       return res
         .status(404)
         .send({ success: false, message: "Student not found" });
     }
     // const hashedPass = await bcrypt.hash(password, 10);
-    student.password=password
+    student.Password=Password
     await student.save();
     res.status(200).send({ success: true, student });
   }catch(error){
@@ -1167,7 +1228,7 @@ router.put('/update-passwordSt/:id',async (req,res)=>{
 router.delete("/delete-student/:id", async (req, res) => {
 try{
   const studentId=req.params.id
-  const deletedStudent = await studentModel.findByIdAndRemove(studentId);
+  const deletedStudent = await tStudent.findByIdAndRemove(studentId);
   if (!deletedStudent) {
     return res
       .status(404)
