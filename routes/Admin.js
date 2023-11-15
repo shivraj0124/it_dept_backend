@@ -38,7 +38,7 @@ router.get("/get-students-data",async (req,res)=>{
    const semShift = req.body.semShift;
    try {
      const dataArray = JSON.parse(dataString);
-     console.log(dataArray)
+    // console.log(dataArray)
      const studentsToSave = dataArray.map((data) => ({
        EnrollmentNo: data.EnrollmentNo,
        Name: data.Name,
@@ -49,7 +49,7 @@ router.get("/get-students-data",async (req,res)=>{
        Shift: semShift.Shift,
      }));
     //  const enrollmentNumbers = dataArray.map((data) => data.EnrollmentNo);
-     console.log("Enrollment Numbers:", studentsToSave);
+    // console.log("Enrollment Numbers:", studentsToSave);
      const existingStudents = await tStudent.find({
        $or: [
          {
@@ -71,7 +71,7 @@ router.get("/get-students-data",async (req,res)=>{
        return;
      }
      const result = await tStudent.insertMany(studentsToSave);
-      console.log("Saved:", result);
+      //console.log("Saved:", result);
 
      res.status(200).send({success:true,message: "Data received and saved successfully" });
    } catch (error) {
