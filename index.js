@@ -10,13 +10,9 @@ const auth = require("./routes/Auth");
 const faculty = require("./routes/Faculty");
 
 const PORT = 3000;
-
 const url = process.env.API;
-// const fs = require("fs");
-// const path = require("path");
 
-app.use(
-  cors({
+app.use(cors({
     // origin: "http://localhost:5173",
     // origin:'*',
     origin: "https://information-technology.netlify.app",
@@ -25,18 +21,12 @@ app.use(
     optionSuccessStatus: 200,
   })
 );
-// app.use("./public/images",express.static("files"))
-// Create a temporary directory if it doesn't exist
-// const tempDirectory = path.join(__dirname, "temp"); // Use an absolute path
-// if (!fs.existsSync(tempDirectory)) {
-//   fs.mkdirSync(tempDirectory);
-// }
 
 app.use(express.json());
 
 app.use(
   fileUpload({
-    useTempFiles: true, // Disable writing to disk (use memory storage)
+    useTempFiles: true, 
   })
 );
 

@@ -340,8 +340,9 @@ router.put("/update-password/:id", async (req, res) => {
 router.put("/update-profile/:id", async (req, res) => {
   try {
     const facultyId = req.params.id;
+    console.log(facultyId)
     const faculty = await facultyModel.findById(facultyId);
-
+    console.log(faculty)
     const { name, email, phone, qualification, post, experience } = req.body;
     const facultyExist = await facultyModel.findOne({
       email: email,
@@ -367,8 +368,6 @@ router.put("/update-profile/:id", async (req, res) => {
       faculty.qualification = qualification;
       faculty.post = post;
       faculty.experience = experience;
-
-      // Handle the optional photo upload and save the URL to the faculty document
       if (req.files && req.files.photo) {
         const photoFile = req.files.photo;
         const result = await uploadPhotoToCloudinary(photoFile);
@@ -378,7 +377,6 @@ router.put("/update-profile/:id", async (req, res) => {
         }
       }
 
-      // Save the updated faculty data
       await faculty.save();
 
       res.status(200).send({ success: true,faculty });

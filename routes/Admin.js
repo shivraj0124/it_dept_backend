@@ -25,6 +25,7 @@ cloudinary.config({
 router.get("/get-students-data",async (req,res)=>{
   try{
    const students=await tStudent.find({}).populate("Semester").populate("Shift")
+  //  console.log(students)
    res.send({
     success:true,
     students
@@ -62,7 +63,7 @@ router.get("/get-students-data",async (req,res)=>{
      });
 
      if (existingStudents.length > 0) {
-       console.log("EnrollmentNo or Email already exists:", existingStudents);
+      //  console.log("EnrollmentNo or Email already exists:", existingStudents);
        res.status(200)
          .send({
            success: false,
